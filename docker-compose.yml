@@ -1,0 +1,23 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        # NEXT_PUBLIC_* are baked into the browser bundle at build time.
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+    image: money-management-ai
+    container_name: money-management-ai
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # Server-side runtime config (Supabase access + market data API).
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+      - TWELVE_DATA_API_KEY=${TWELVE_DATA_API_KEY:-}
+    # Optional: load the same vars from .env.local if present (won't fail if missing).
+    env_file:
+      - path: .env.local
+        required: false
+    restart: unless-stopped

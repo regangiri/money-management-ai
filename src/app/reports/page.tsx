@@ -1,0 +1,142 @@
+import type { Metadata } from 'next';
+import {
+  getBudgets,
+  getMonthlySummaries,
+  getSavings,
+  getTransactions,
+} from '@/lib/queries';
+import { formatCurrency } from '@/lib/utils';
+import { MonthlyChart } from '@/components/reports/MonthlyChart';
+import { CategoryBreakdown } from '@/components/reports/CategoryBreakdown';
+import { SavingsBreakdown } from '@/components/reports/SavingsBreakdown';
+
+export const metadata: Metadata = {
+  title: 'Reports — Money Manager',
+};
+
+export const dynamic = 'force-dynamic';
+
+export default async function ReportsPage() {
+  const [monthlySummaries, transactions, budgets, savings] = await Promise.all([
+    getMonthlySummaries(),
+    getTransactions(),
+    getBudgets(),
+    getSavings(),
+  ]);
+
+  const ytdIncome = monthlySummaries.reduce((sum, m) => sum + m.income, 0);
+  const ytdExpenses = monthlySummaries.reduce((sum, m) => sum + m.expenses, 0);
+  // Money actually set aside, not income left unspent.
+  const ytdSavings = monthlySummaries.reduce((sum, m) => sum + m.savings, 0);
+  const savingsRate =
+    ytdIncome > 0 ? Math.round((ytdSavings / ytdIncome) * 100) : 0;
+
+  const totalBudget = budgets.reduce((sum, b) => sum + b.total, 0);
+  const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
+  const budgetRemaining = totalBudget - totalBudgetSpent;
+  const budgetUtilization = Math.round((totalBudgetSpent / totalBudget) * 100);
+
+  return (
+    <div className="p-6 sm:p-8 space-y-6 min-h-full bg-gray-50 dark:bg-gray-950">
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+          Reports
+        </h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Year-to-date — January through June 2026
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
+          <p className="text-xs text-gray-500 dark:text-gray-400">YTD Income</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+            {formatCurrency(ytdIncome)}
+          </p>
+        </div>
+        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            YTD Expenses
+          </p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+            {formatCurrency(ytdExpenses)}
+          </p>
+        </div>
+        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Avg Savings Rate
+          </p>
+          <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
+            {savingsRate}%
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
+          <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+            Budget Performance
+          </p>
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Utilization
+                </span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {budgetUtilization}%
+                </span>
+              </div>
+              <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-indigo-500 rounded-full"
+                  style={{ width: `${budgetUtilization}%` }}
+                />
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {formatCurrency(totalBudgetSpent)} spent of{' '}
+                {formatCurrency(totalBudget)} budgeted
+              </p>
+              <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+                {formatCurrency(budgetRemaining)} remaining
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
+          <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+            Savings Summary
+          </p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 dark:text-gray-400">
+                Total Saved
+              </span>
+              <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                {formatCurrency(ytdSavings)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 dark:text-gray-400">
+                Monthly Avg
+              </span>
+              <span className="text-sm font-bold text-gray-900 dark:text-white">
+                {formatCurrency(ytdSavings / monthlySummaries.length)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <MonthlyChart data={monthlySummaries} />
+        <CategoryBreakdown transactions={transactions} />
+      </div>
+
+      <SavingsBreakdown savings={savings} />
+    </div>
+  );
+}

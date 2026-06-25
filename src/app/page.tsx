@@ -1,65 +1,105 @@
-import Image from "next/image";
+import { DashboardClient } from '@/components/dashboard/DashboardClient';
+import type { StatConfig } from '@/components/dashboard/DashboardClient';
+import {
+  getBudgets,
+  getMonthlySummaries,
+  getPortfolio,
+  getTransactions,
+  getWishlist,
+} from '@/lib/queries';
+import { formatCurrency, savingsRate } from '@/lib/utils';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function DashboardPage() {
+  const [transactions, budgets, monthly, wishlist, portfolio] =
+    await Promise.all([
+      getTransactions(),
+      getBudgets(),
+      getMonthlySummaries(),
+      getWishlist(),
+      getPortfolio(),
+    ]);
+
+  // Surface goals still in progress first, then the largest positions.
+  const wishlistPreview = wishlist
+    .filter((w) => w.status === 'in_progress')
+    .slice(0, 3);
+  const topHoldings = [...portfolio.positions]
+    .sort((a, b) => b.marketValue - a.marketValue)
+    .slice(0, 3);
+
+  const current = monthly[monthly.length - 1];
+  const previous = monthly[monthly.length - 2];
+
+  const totalBalance = transactions.reduce((sum, t) => sum + t.amount, 0);
+  const income = current?.income ?? 0;
+  const expenses = current?.expenses ?? 0;
+  const saved = current?.savings ?? 0;
+  // Savings rate = money actually set aside as a share of income.
+  const rate = savingsRate(saved, income);
+
+  const incomeDelta = previous ? income - previous.income : 0;
+  const expensesDelta =
+    previous && previous.expenses > 0
+      ? Math.round(((expenses - previous.expenses) / previous.expenses) * 100)
+      : 0;
+  const savingsDelta = previous
+    ? rate - savingsRate(previous.savings, previous.income)
+    : 0;
+
+  const stats: StatConfig[] = [
+    {
+      label: 'Total Balance',
+      value: formatCurrency(totalBalance),
+      change: 'Across all transactions',
+      positive: totalBalance >= 0,
+      icon: 'balance',
+      iconWrapClass: 'bg-indigo-50 dark:bg-indigo-900/30',
+      iconClass: 'text-indigo-600 dark:text-indigo-400',
+    },
+    {
+      label: 'Monthly Income',
+      value: formatCurrency(income),
+      change: previous
+        ? `${incomeDelta >= 0 ? '+' : '-'}${formatCurrency(incomeDelta)} vs last month`
+        : 'This month',
+      positive: incomeDelta >= 0,
+      icon: 'income',
+      iconWrapClass: 'bg-green-50 dark:bg-green-900/30',
+      iconClass: 'text-green-600 dark:text-green-400',
+    },
+    {
+      label: 'Monthly Expenses',
+      value: formatCurrency(expenses),
+      change: previous
+        ? `${expensesDelta >= 0 ? '+' : ''}${expensesDelta}% vs last month`
+        : 'This month',
+      positive: expensesDelta <= 0,
+      icon: 'expenses',
+      iconWrapClass: 'bg-red-50 dark:bg-red-900/30',
+      iconClass: 'text-red-500 dark:text-red-400',
+    },
+    {
+      label: 'Savings Rate',
+      value: `${rate}%`,
+      change: previous
+        ? `${savingsDelta >= 0 ? '+' : ''}${savingsDelta}pts vs last month`
+        : 'This month',
+      positive: savingsDelta >= 0,
+      icon: 'savings',
+      iconWrapClass: 'bg-blue-50 dark:bg-blue-900/30',
+      iconClass: 'text-blue-600 dark:text-blue-400',
+    },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <DashboardClient
+      stats={stats}
+      recentTransactions={transactions.slice(0, 5)}
+      overviewBudgets={budgets.slice(0, 4)}
+      wishlistItems={wishlistPreview}
+      topHoldings={topHoldings}
+    />
   );
 }
