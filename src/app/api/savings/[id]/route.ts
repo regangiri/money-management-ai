@@ -1,9 +1,7 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 import { applyToWishlist } from '@/lib/savings';
-
-const USER_ID = 'user-1'; // Mock user ID
 
 function revalidate() {
   revalidatePath('/');
@@ -19,11 +17,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabase not configured' },
-        { status: 400 },
-      );
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -33,7 +32,7 @@ export async function DELETE(
       .from('transactions')
       .select('amount, wishlist_id')
       .eq('id', id)
-      .eq('user_id', USER_ID)
+      .eq('user_id', user.id)
       .eq('category', 'Savings')
       .maybeSingle();
 
@@ -45,7 +44,7 @@ export async function DELETE(
       .from('transactions')
       .delete()
       .eq('id', id)
-      .eq('user_id', USER_ID)
+      .eq('user_id', user.id)
       .eq('category', 'Savings');
 
     if (error) {
@@ -54,7 +53,12 @@ export async function DELETE(
     }
 
     if (saving.wishlist_id) {
-      await applyToWishlist(saving.wishlist_id, -Math.abs(Number(saving.amount)));
+      await applyToWishlist(
+        supabase,
+        user.id,
+        saving.wishlist_id,
+        -Math.abs(Number(saving.amount)),
+      );
     }
 
     revalidate();

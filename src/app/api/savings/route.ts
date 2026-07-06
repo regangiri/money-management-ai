@@ -1,10 +1,8 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 import { getSavings } from '@/lib/queries';
 import { applyToWishlist } from '@/lib/savings';
-
-const USER_ID = 'user-1'; // Mock user ID
 
 function revalidate() {
   revalidatePath('/');
@@ -21,11 +19,12 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabase not configured' },
-        { status: 400 },
-      );
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -56,7 +55,7 @@ export async function POST(request: NextRequest) {
       .from('transactions')
       .insert([
         {
-          user_id: USER_ID,
+          user_id: user.id,
           name,
           category: 'Savings',
           amount: -amount,
@@ -72,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (wishlistId) {
-      await applyToWishlist(wishlistId, amount);
+      await applyToWishlist(supabase, user.id, wishlistId, amount);
     }
 
     revalidate();

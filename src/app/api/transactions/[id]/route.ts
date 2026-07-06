@@ -1,8 +1,6 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
-
-const USER_ID = 'user-1'; // Mock user ID
+import { createClient } from '@/lib/supabase/server';
 
 function revalidate() {
   revalidatePath('/');
@@ -16,11 +14,12 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabase not configured' },
-        { status: 400 },
-      );
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -48,7 +47,7 @@ export async function PATCH(
       .from('transactions')
       .update(update)
       .eq('id', id)
-      .eq('user_id', USER_ID)
+      .eq('user_id', user.id)
       .select();
 
     if (error) {
@@ -72,11 +71,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabase not configured' },
-        { status: 400 },
-      );
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -84,7 +84,7 @@ export async function DELETE(
       .from('transactions')
       .delete()
       .eq('id', id)
-      .eq('user_id', USER_ID);
+      .eq('user_id', user.id);
 
     if (error) {
       console.error('Delete error:', error);

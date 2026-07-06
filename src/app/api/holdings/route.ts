@@ -1,9 +1,7 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 import { getHoldings } from '@/lib/queries';
-
-const USER_ID = 'user-1'; // Mock user ID
 
 export async function GET() {
   return NextResponse.json(await getHoldings());
@@ -11,11 +9,12 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabase not configured' },
-        { status: 400 },
-      );
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -46,7 +45,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('holdings')
       .upsert(
-        [{ user_id: USER_ID, symbol, name, quantity, avg_cost: avgCost }],
+        [{ user_id: user.id, symbol, name, quantity, avg_cost: avgCost }],
         { onConflict: 'user_id,symbol' },
       )
       .select();

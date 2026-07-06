@@ -1,10 +1,8 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 import { getWishlist } from '@/lib/queries';
 import type { WishlistPriority, WishlistStatus } from '@/types';
-
-const USER_ID = 'user-1'; // Mock user ID
 
 const PRIORITIES: WishlistPriority[] = ['high', 'medium', 'low'];
 const STATUSES: WishlistStatus[] = ['in_progress', 'fulfilled', 'abandoned'];
@@ -15,11 +13,12 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabase not configured' },
-        { status: 400 },
-      );
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -58,7 +57,7 @@ export async function POST(request: NextRequest) {
       .from('wishlist')
       .insert([
         {
-          user_id: USER_ID,
+          user_id: user.id,
           name,
           price_target: priceTarget,
           priority,

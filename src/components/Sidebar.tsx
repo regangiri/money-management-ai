@@ -7,6 +7,7 @@ import {
   Gift,
   LayoutDashboard,
   LineChart,
+  LogOut,
   Menu,
   PiggyBank,
   User,
@@ -15,6 +16,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { signOut } from '@/app/auth/actions';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -27,12 +29,23 @@ const NAV_ITEMS = [
   { href: '/profile', label: 'Profile', icon: User },
 ];
 
-const Sidebar = () => {
+type SidebarProps = {
+  userName?: string;
+  userEmail?: string;
+};
+
+const Sidebar = ({ userName, userEmail }: SidebarProps) => {
   // Desktop: collapsed = icon rail vs full width
   const [collapsed, setCollapsed] = useState(false);
   // Mobile: drawer open vs closed (closed by default, takes 0 width)
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+
+  // The auth screens render full-bleed without the app chrome.
+  if (pathname === '/login' || pathname === '/signup') return null;
+
+  const displayName = userName || 'Account';
+  const initial = (userName || userEmail || '?').charAt(0).toUpperCase();
 
   const NavContent = (
     <>
@@ -79,7 +92,7 @@ const Sidebar = () => {
           className={`flex items-center gap-3 px-3 py-2 rounded-lg ${collapsed ? 'sm:justify-center' : ''}`}
         >
           <div className="size-7 rounded-full bg-indigo-100 dark:bg-indigo-900 shrink-0 flex items-center justify-center text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-            R
+            {initial}
           </div>
           <div
             className={
@@ -89,13 +102,28 @@ const Sidebar = () => {
             }
           >
             <span className="text-xs font-medium text-gray-800 dark:text-white truncate">
-              Regan
+              {displayName}
             </span>
-            <span className="text-xs text-gray-400 truncate">
-              regan@email.com
-            </span>
+            {userEmail && (
+              <span className="text-xs text-gray-400 truncate">
+                {userEmail}
+              </span>
+            )}
           </div>
         </div>
+
+        <form action={signOut}>
+          <button
+            type="submit"
+            title={collapsed ? 'Sign out' : undefined}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors ${collapsed ? 'sm:justify-center' : ''}`}
+          >
+            <LogOut className="size-4 shrink-0" />
+            <span className={collapsed ? 'sm:hidden' : 'truncate'}>
+              Sign out
+            </span>
+          </button>
+        </form>
       </div>
     </>
   );

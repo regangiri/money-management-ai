@@ -10,19 +10,17 @@ import type {
   WishlistItem,
 } from '@/types';
 import { OTHERS_DESTINATION } from '@/types';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
+import { getSessionUser } from '@/lib/auth';
 import {
   budgets as mockBudgets,
   holdings as mockHoldings,
   monthlySummaries as mockMonthlySummaries,
   profile as mockProfile,
   transactions as mockTransactions,
-  wishlist as mockWishlist,
 } from '@/lib/data';
 import { getQuotes, getTimeSeries } from '@/lib/market';
 import { buildPortfolio } from '@/lib/portfolio';
-
-const USER_ID = 'user-1'; // Mock user ID until real auth is added
 
 const CATEGORY_COLORS: Record<string, string> = {
   Groceries: 'bg-indigo-500',
@@ -38,12 +36,14 @@ export function colorForCategory(category: string): string {
 }
 
 export async function getTransactions(): Promise<Transaction[]> {
-  if (!isSupabaseConfigured()) return mockTransactions;
+  const user = await getSessionUser();
+  if (!user) return mockTransactions;
 
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('transactions')
     .select('*')
-    .eq('user_id', USER_ID)
+    .eq('user_id', user.id)
     .order('date', { ascending: false });
 
   if (error) {
@@ -55,12 +55,14 @@ export async function getTransactions(): Promise<Transaction[]> {
 }
 
 export async function getBudgets(): Promise<Budget[]> {
-  if (!isSupabaseConfigured()) return mockBudgets;
+  const user = await getSessionUser();
+  if (!user) return mockBudgets;
 
+  const supabase = await createClient();
   const { data: budgetData, error } = await supabase
     .from('budgets')
     .select('*')
-    .eq('user_id', USER_ID)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: true });
 
   if (error) {
@@ -72,7 +74,7 @@ export async function getBudgets(): Promise<Budget[]> {
   const { data: transactionData } = await supabase
     .from('transactions')
     .select('category, amount')
-    .eq('user_id', USER_ID);
+    .eq('user_id', user.id);
 
   const spentByCategory = (transactionData ?? []).reduce<Record<string, number>>(
     (acc, t) => {
@@ -92,8 +94,6 @@ export async function getBudgets(): Promise<Budget[]> {
 }
 
 export async function getMonthlySummaries(): Promise<MonthlySummary[]> {
-  if (!isSupabaseConfigured()) return mockMonthlySummaries;
-
   const transactions = await getTransactions();
   if (transactions.length === 0) return mockMonthlySummaries;
 
@@ -125,19 +125,30 @@ export async function getMonthlySummaries(): Promise<MonthlySummary[]> {
 }
 
 export async function getProfile(): Promise<Profile> {
-  if (!isSupabaseConfigured()) return mockProfile;
+  const user = await getSessionUser();
+  if (!user) return mockProfile;
 
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('user_id', USER_ID)
+    .eq('user_id', user.id)
     .maybeSingle();
 
   if (error) {
     console.error('Supabase error (profile):', error);
     return mockProfile;
   }
-  if (!data) return mockProfile;
+  // New users may not have a profile row yet — fall back to their auth details.
+  if (!data) {
+    return {
+      name: (user.user_metadata?.name as string) ?? '',
+      email: user.email ?? '',
+      phone: '',
+      occupation: '',
+      salary: 0,
+    };
+  }
 
   return {
     name: data.name ?? '',
@@ -149,12 +160,14 @@ export async function getProfile(): Promise<Profile> {
 }
 
 export async function getHoldings(): Promise<Holding[]> {
-  if (!isSupabaseConfigured()) return mockHoldings;
+  const user = await getSessionUser();
+  if (!user) return mockHoldings;
 
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('holdings')
     .select('*')
-    .eq('user_id', USER_ID)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: true });
 
   if (error) {
@@ -202,17 +215,19 @@ export async function getPortfolio(): Promise<Portfolio> {
 }
 
 export async function getWishlist(): Promise<WishlistItem[]> {
-  if (!isSupabaseConfigured()) return mockWishlist;
+  const user = await getSessionUser();
+  if (!user) return [];
 
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('wishlist')
     .select('*')
-    .eq('user_id', USER_ID)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: true });
 
   if (error) {
     console.error('Supabase error (wishlist):', error);
-    return mockWishlist;
+    return [];
   }
 
   // Map the snake_case columns to the camelCase app type.
@@ -232,7 +247,8 @@ export async function getWishlist(): Promise<WishlistItem[]> {
 // Savings are Savings-category transactions, optionally allocated to a wishlist
 // item. Returns positive amounts with a resolved destination label.
 export async function getSavings(): Promise<SavingEntry[]> {
-  if (!isSupabaseConfigured()) {
+  const user = await getSessionUser();
+  if (!user) {
     return mockTransactions
       .filter((t) => t.category === 'Savings')
       .map((t) => ({
@@ -245,10 +261,11 @@ export async function getSavings(): Promise<SavingEntry[]> {
       }));
   }
 
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('transactions')
     .select('id, name, amount, date, wishlist_id')
-    .eq('user_id', USER_ID)
+    .eq('user_id', user.id)
     .eq('category', 'Savings')
     .order('date', { ascending: false });
 
@@ -261,7 +278,7 @@ export async function getSavings(): Promise<SavingEntry[]> {
   const { data: wishlistRows } = await supabase
     .from('wishlist')
     .select('id, name')
-    .eq('user_id', USER_ID);
+    .eq('user_id', user.id);
   const nameById = new Map(
     (wishlistRows ?? []).map((w) => [w.id, w.name as string]),
   );

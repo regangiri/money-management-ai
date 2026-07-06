@@ -1,15 +1,19 @@
-import { supabase } from '@/lib/supabase';
-
-const USER_ID = 'user-1'; // Mock user ID
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 // Add `delta` to a wishlist item's saved amount (negative to reverse a saving),
 // auto-fulfilling it once it reaches its target. Never overrides "abandoned".
-export async function applyToWishlist(wishlistId: string, delta: number) {
+// Runs on the caller's authenticated client so RLS scopes it to the user.
+export async function applyToWishlist(
+  supabase: SupabaseClient,
+  userId: string,
+  wishlistId: string,
+  delta: number,
+) {
   const { data: item, error } = await supabase
     .from('wishlist')
     .select('amount_saved, price_target, status')
     .eq('id', wishlistId)
-    .eq('user_id', USER_ID)
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (error || !item) return;
@@ -26,5 +30,5 @@ export async function applyToWishlist(wishlistId: string, delta: number) {
     .from('wishlist')
     .update(update)
     .eq('id', wishlistId)
-    .eq('user_id', USER_ID);
+    .eq('user_id', userId);
 }
