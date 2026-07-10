@@ -80,7 +80,7 @@ export function AutoAllocateForm({
   };
 
   const fieldClass =
-    'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+    'w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent';
 
   return (
     <Modal isOpen={isOpen} title="Auto-allocate budgets" onClose={onClose}>
@@ -98,7 +98,7 @@ export function AutoAllocateForm({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               Month
             </label>
             <input
@@ -110,7 +110,7 @@ export function AutoAllocateForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               Monthly salary (Rp)
             </label>
             <input
@@ -124,23 +124,23 @@ export function AutoAllocateForm({
           </div>
         </div>
 
-        <div className="border border-gray-200 dark:border-gray-800 rounded-lg divide-y divide-gray-100 dark:divide-gray-800">
+        <div className="border border-slate-200 dark:border-slate-800 rounded-lg divide-y divide-slate-100 dark:divide-slate-800">
           {rows.map((row) => (
             <div
               key={row.category}
               className="flex items-center justify-between px-3 py-2 text-sm"
             >
-              <span className="text-gray-700 dark:text-gray-300">
+              <span className="text-slate-700 dark:text-slate-300">
                 {row.category}
-                <span className="ml-2 text-xs text-gray-400">{row.pct}%</span>
+                <span className="ml-2 text-xs text-slate-400">{row.pct}%</span>
               </span>
-              <span className="font-medium text-gray-900 dark:text-white">
+              <span className="font-medium text-slate-900 dark:text-white">
                 {formatCurrency(row.value)}
               </span>
             </div>
           ))}
-          <div className="flex items-center justify-between px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800/50">
-            <span className="text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-between px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800/50">
+            <span className="text-slate-500 dark:text-slate-400">
               Left for savings &amp; goals
             </span>
             <span className="font-medium text-emerald-600 dark:text-emerald-400">
@@ -154,7 +154,7 @@ export function AutoAllocateForm({
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           >
             Cancel
           </button>
@@ -162,7 +162,7 @@ export function AutoAllocateForm({
             type="button"
             onClick={handleApply}
             disabled={loading || !month}
-            className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             {loading ? 'Allocating...' : 'Allocate'}
           </button>

@@ -101,7 +101,7 @@ export function AddBudgetForm({
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
             Category
           </label>
           <input
@@ -111,7 +111,7 @@ export function AddBudgetForm({
             defaultValue={budget?.category}
             disabled={editMode}
             placeholder="Select or enter category"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-60"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-60"
             required
           />
           {!editMode && (
@@ -121,7 +121,7 @@ export function AddBudgetForm({
                   <option key={cat} value={cat} />
                 ))}
               </datalist>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Choose from suggestions or enter a custom category
               </p>
             </>
@@ -129,11 +129,11 @@ export function AddBudgetForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
             Budget Amount
           </label>
           <div className="flex items-center">
-            <span className="text-gray-500 dark:text-gray-400 mr-2">Rp</span>
+            <span className="text-slate-500 dark:text-slate-400 mr-2">Rp</span>
             <input
               type="number"
               name="total"
@@ -141,7 +141,7 @@ export function AddBudgetForm({
               placeholder="0"
               step="1"
               min="0"
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
           </div>
@@ -151,14 +151,14 @@ export function AddBudgetForm({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             disabled={loading}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             disabled={loading}
           >
             {loading ? 'Saving...' : editMode ? 'Save changes' : 'Add Budget'}

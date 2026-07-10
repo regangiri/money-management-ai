@@ -22,10 +22,10 @@ const STATUSES: { value: WishlistStatus; label: string }[] = [
 ];
 
 const FIELD_CLASS =
-  'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+  'w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent';
 
 const LABEL_CLASS =
-  'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+  'block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1';
 
 type AddWishlistFormProps = {
   isOpen: boolean;
@@ -201,7 +201,7 @@ export function AddWishlistForm({
           <div>
             <label className={LABEL_CLASS}>
               Target date{' '}
-              <span className="text-gray-400 font-normal">(optional)</span>
+              <span className="text-slate-400 font-normal">(optional)</span>
             </label>
             <input
               type="date"
@@ -229,7 +229,7 @@ export function AddWishlistForm({
 
         <div>
           <label className={LABEL_CLASS}>
-            Notes <span className="text-gray-400 font-normal">(optional)</span>
+            Notes <span className="text-slate-400 font-normal">(optional)</span>
           </label>
           <textarea
             name="notes"
@@ -244,14 +244,14 @@ export function AddWishlistForm({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             disabled={loading}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             disabled={loading}
           >
             {loading

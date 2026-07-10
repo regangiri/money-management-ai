@@ -68,7 +68,7 @@ export function LivePortfolio({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
         <span className="relative flex size-2">
           <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping" />
           <span className="relative inline-flex size-2 rounded-full bg-green-500" />
@@ -88,8 +88,8 @@ export function LivePortfolio({
           change={`${signed(totals.dayChange)} today`}
           positive={totals.dayChange >= 0}
           icon={Wallet}
-          iconWrapClass="bg-indigo-50 dark:bg-indigo-900/30"
-          iconClass="text-indigo-600 dark:text-indigo-400"
+          iconWrapClass="bg-blue-50 dark:bg-blue-900/30"
+          iconClass="text-blue-600 dark:text-blue-400"
         />
         <StatCard
           label="Total P&L"

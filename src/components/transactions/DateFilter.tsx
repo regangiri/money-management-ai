@@ -33,14 +33,14 @@ export function DateFilter() {
   };
 
   const presetClass =
-    'px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors';
+    'px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors';
   const inputClass =
-    'px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+    'px-2 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent';
 
   return (
-    <div className="flex flex-wrap items-end gap-3 border border-gray-200 dark:border-gray-800 rounded-xl p-3 sm:p-4 bg-white dark:bg-gray-900">
+    <div className="flex flex-wrap items-end gap-3 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-4 bg-white dark:bg-slate-900">
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-gray-500 dark:text-gray-400">From</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400">From</label>
         <input
           type="date"
           value={from}
@@ -50,7 +50,7 @@ export function DateFilter() {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-gray-500 dark:text-gray-400">To</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400">To</label>
         <input
           type="date"
           value={to}

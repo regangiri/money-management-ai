@@ -9,7 +9,7 @@ export function MarketStatus({ isOpen, name }: MarketStatusProps) {
       className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium ${
         isOpen
           ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-          : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+          : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
       }`}
       title={name}
     >
@@ -19,7 +19,7 @@ export function MarketStatus({ isOpen, name }: MarketStatusProps) {
         )}
         <span
           className={`relative inline-flex size-2 rounded-full ${
-            isOpen ? 'bg-green-500' : 'bg-gray-400'
+            isOpen ? 'bg-green-500' : 'bg-slate-400'
           }`}
         />
       </span>
