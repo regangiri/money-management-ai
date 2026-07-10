@@ -1,5 +1,6 @@
 import { DashboardClient } from '@/components/dashboard/DashboardClient';
 import type { StatConfig } from '@/components/dashboard/DashboardClient';
+import { getSessionUser } from '@/lib/auth';
 import {
   getBudgets,
   getMonthlySummaries,
@@ -12,6 +13,9 @@ import { formatCurrency, savingsRate } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
+  const user = await getSessionUser();
+  const userName = (user?.user_metadata?.name as string) || undefined;
+
   const [transactions, budgets, monthly, wishlist, portfolio] =
     await Promise.all([
       getTransactions(),
@@ -95,6 +99,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
+      userName={userName}
       stats={stats}
       recentTransactions={transactions.slice(0, 5)}
       overviewBudgets={budgets.slice(0, 4)}
