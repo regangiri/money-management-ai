@@ -44,7 +44,7 @@ export type StatConfig = {
 };
 
 type DashboardClientProps = {
-  userName: string;
+  userName?: string;
   stats: StatConfig[];
   recentTransactions: Transaction[];
   overviewBudgets: Budget[];
