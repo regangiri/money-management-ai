@@ -9,6 +9,7 @@ import { BudgetCard } from '@/components/budgets/BudgetCard';
 import { AddBudgetForm } from '@/components/budgets/AddBudgetForm';
 import { AutoAllocateForm } from '@/components/budgets/AutoAllocateForm';
 import { BudgetLeaks } from '@/components/budgets/BudgetLeaks';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 type BudgetsClientProps = {
   budgets: Budget[];
@@ -21,28 +22,23 @@ export function BudgetsClient({ budgets, salary, leaks }: BudgetsClientProps) {
   const [showForm, setShowForm] = useState(false);
   const [showAuto, setShowAuto] = useState(false);
   const [editing, setEditing] = useState<Budget | null>(null);
-  const [deletingId, setDeletingId] = useState<string | number | null>(null);
+  const [pending, setPending] = useState<Budget | null>(null);
 
-  const handleDelete = async (budget: Budget) => {
-    if (!window.confirm(`Delete the ${budget.category} budget?`)) return;
-    setDeletingId(budget.id);
-    try {
-      const res = await fetch(`/api/budgets/${budget.id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        window.alert(data.error || 'Failed to delete budget');
-        return;
-      }
-      router.refresh();
-    } finally {
-      setDeletingId(null);
+  const handleConfirmDelete = async () => {
+    if (!pending) return;
+    const res = await fetch(`/api/budgets/${pending.id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to delete budget');
     }
+    setPending(null);
+    router.refresh();
   };
 
   const iconBtn =
-    'p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-white dark:hover:bg-gray-800 transition-colors disabled:opacity-40';
+    'p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-colors disabled:opacity-40';
 
   const totalBudget = budgets.reduce((sum, b) => sum + b.total, 0);
   const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
@@ -51,27 +47,27 @@ export function BudgetsClient({ budgets, salary, leaks }: BudgetsClientProps) {
 
   return (
     <>
-      <div className="p-6 sm:p-8 space-y-6 min-h-full bg-gray-50 dark:bg-gray-950">
+      <div className="p-6 sm:p-8 space-y-6 min-h-full bg-slate-50 dark:bg-slate-950">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
               Budgets
             </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               June 2026 — {overallPercent}% of total budget used
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowAuto(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <Wand2 className="size-4" />
               <span>Auto-allocate</span>
             </button>
             <button
               onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="size-4" />
               <span>New Budget</span>
@@ -79,22 +75,22 @@ export function BudgetsClient({ budgets, salary, leaks }: BudgetsClientProps) {
           </div>
         </div>
 
-        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900 space-y-3">
+        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900 space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-gray-700 dark:text-gray-300">
+            <span className="font-medium text-slate-700 dark:text-slate-300">
               Overall Spending
             </span>
-            <span className="text-gray-500 dark:text-gray-400">
+            <span className="text-slate-500 dark:text-slate-400">
               {formatCurrency(totalSpent)} of {formatCurrency(totalBudget)}
             </span>
           </div>
-          <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-indigo-500 rounded-full transition-all"
+              className="h-full bg-blue-500 rounded-full transition-all"
               style={{ width: `${overallPercent}%` }}
             />
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {formatCurrency(totalRemaining)} remaining across all budgets
           </p>
         </div>
@@ -116,8 +112,7 @@ export function BudgetsClient({ budgets, salary, leaks }: BudgetsClientProps) {
                     <Pencil className="size-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(budget)}
-                    disabled={deletingId === budget.id}
+                    onClick={() => setPending(budget)}
                     className={iconBtn}
                     aria-label="Delete budget"
                   >
@@ -154,6 +149,21 @@ export function BudgetsClient({ budgets, salary, leaks }: BudgetsClientProps) {
         onClose={() => setShowAuto(false)}
         salary={salary}
         onSuccess={() => window.location.reload()}
+      />
+
+      <ConfirmDialog
+        isOpen={pending !== null}
+        title="Delete budget"
+        message={
+          pending ? (
+            <>
+              Delete the{' '}
+              <span className="font-semibold">{pending.category}</span> budget?
+            </>
+          ) : null
+        }
+        onConfirm={handleConfirmDelete}
+        onClose={() => setPending(null)}
       />
     </>
   );

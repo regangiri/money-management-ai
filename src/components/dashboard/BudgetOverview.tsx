@@ -8,12 +8,12 @@ type BudgetOverviewProps = {
 
 export function BudgetOverview({ budgets }: BudgetOverviewProps) {
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Budget Overview</h2>
+    <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Budget Overview</h2>
         <Link
           href="/budgets"
-          className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+          className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
         >
           Manage
         </Link>
@@ -25,18 +25,18 @@ export function BudgetOverview({ budgets }: BudgetOverviewProps) {
           return (
             <div key={b.id} className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300">{b.category}</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">{b.category}</span>
                 <span
                   className={`text-xs font-medium ${
                     isWarning
                       ? 'text-amber-600 dark:text-amber-400'
-                      : 'text-gray-500 dark:text-gray-400'
+                      : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
                   ${b.spent} / ${b.total}
                 </span>
               </div>
-              <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${isWarning ? 'bg-amber-500' : b.color}`}
                   style={{ width: `${percent}%` }}

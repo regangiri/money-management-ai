@@ -37,33 +37,33 @@ export default async function ReportsPage() {
   const budgetUtilization = Math.round((totalBudgetSpent / totalBudget) * 100);
 
   return (
-    <div className="p-6 sm:p-8 space-y-6 min-h-full bg-gray-50 dark:bg-gray-950">
+    <div className="p-6 sm:p-8 space-y-6 min-h-full bg-slate-50 dark:bg-slate-950">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
           Reports
         </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Year-to-date — January through June 2026
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
-          <p className="text-xs text-gray-500 dark:text-gray-400">YTD Income</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900">
+          <p className="text-xs text-slate-500 dark:text-slate-400">YTD Income</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
             {formatCurrency(ytdIncome)}
           </p>
         </div>
-        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             YTD Expenses
           </p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+          <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
             {formatCurrency(ytdExpenses)}
           </p>
         </div>
-        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Avg Savings Rate
           </p>
           <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
@@ -73,29 +73,29 @@ export default async function ReportsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
-          <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900">
+          <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
             Budget Performance
           </p>
           <div className="space-y-3">
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-slate-600 dark:text-slate-400">
                   Utilization
                 </span>
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="font-medium text-slate-900 dark:text-white">
                   {budgetUtilization}%
                 </span>
               </div>
-              <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-indigo-500 rounded-full"
+                  className="h-full bg-blue-500 rounded-full"
                   style={{ width: `${budgetUtilization}%` }}
                 />
               </div>
             </div>
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {formatCurrency(totalBudgetSpent)} spent of{' '}
                 {formatCurrency(totalBudget)} budgeted
               </p>
@@ -106,13 +106,13 @@ export default async function ReportsPage() {
           </div>
         </div>
 
-        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900">
-          <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900">
+          <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
             Savings Summary
           </p>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600 dark:text-gray-400">
+              <span className="text-xs text-slate-600 dark:text-slate-400">
                 Total Saved
               </span>
               <span className="text-sm font-bold text-green-600 dark:text-green-400">
@@ -120,10 +120,10 @@ export default async function ReportsPage() {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600 dark:text-gray-400">
+              <span className="text-xs text-slate-600 dark:text-slate-400">
                 Monthly Avg
               </span>
-              <span className="text-sm font-bold text-gray-900 dark:text-white">
+              <span className="text-sm font-bold text-slate-900 dark:text-white">
                 {formatCurrency(ytdSavings / monthlySummaries.length)}
               </span>
             </div>

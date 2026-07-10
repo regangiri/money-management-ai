@@ -20,22 +20,22 @@ const SEVERITY_STYLES: Record<
     chip: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
   },
   low: {
-    dot: 'bg-gray-400',
+    dot: 'bg-slate-400',
     label: 'Low',
-    chip: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+    chip: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
   },
 };
 
 export function BudgetLeaks({ leaks }: BudgetLeaksProps) {
   if (leaks.length === 0) {
     return (
-      <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900 flex items-center gap-3">
+      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900 flex items-center gap-3">
         <ShieldCheck className="size-5 text-green-600 dark:text-green-400 shrink-0" />
         <div>
-          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+          <p className="text-sm font-semibold text-slate-900 dark:text-white">
             No budget leaks detected
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Your spending is within budget and nothing looks like it&apos;s
             slipping through.
           </p>
@@ -45,15 +45,15 @@ export function BudgetLeaks({ leaks }: BudgetLeaksProps) {
   }
 
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 overflow-hidden">
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+    <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-100 dark:border-slate-800">
         <AlertTriangle className="size-4 text-amber-500" />
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
           Budget Leaks
         </h2>
-        <span className="text-xs text-gray-400">({leaks.length})</span>
+        <span className="text-xs text-slate-400">({leaks.length})</span>
       </div>
-      <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+      <ul className="divide-y divide-slate-100 dark:divide-slate-800">
         {leaks.map((leak) => {
           const style = SEVERITY_STYLES[leak.severity];
           return (
@@ -63,7 +63,7 @@ export function BudgetLeaks({ leaks }: BudgetLeaksProps) {
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">
                     {leak.title}
                   </p>
                   <span
@@ -72,7 +72,7 @@ export function BudgetLeaks({ leaks }: BudgetLeaksProps) {
                     {style.label}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   {leak.detail}
                 </p>
               </div>
