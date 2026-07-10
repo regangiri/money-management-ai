@@ -1,6 +1,12 @@
 'use client';
 
-import { DollarSign, Plus, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import {
+  DollarSign,
+  Plus,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import { StatCard } from '@/components/ui/StatCard';
@@ -38,6 +44,7 @@ export type StatConfig = {
 };
 
 type DashboardClientProps = {
+  userName?: string;
   stats: StatConfig[];
   recentTransactions: Transaction[];
   overviewBudgets: Budget[];
@@ -46,6 +53,7 @@ type DashboardClientProps = {
 };
 
 export function DashboardClient({
+  userName,
   stats,
   recentTransactions,
   overviewBudgets,
@@ -60,7 +68,7 @@ export function DashboardClient({
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
-              Good morning, Regan
+              Good morning, {userName}!
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Tuesday, June 17, 2026 — here&apos;s your financial overview
