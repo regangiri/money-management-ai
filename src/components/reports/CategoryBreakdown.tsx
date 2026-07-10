@@ -27,8 +27,8 @@ export function CategoryBreakdown({ transactions }: CategoryBreakdownProps) {
     .sort((a, b) => b.total - a.total);
 
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-5">
-      <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-5">
+    <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-5">
+      <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-5">
         Spending by Category
       </h2>
       <div className="space-y-4">
@@ -39,15 +39,15 @@ export function CategoryBreakdown({ transactions }: CategoryBreakdownProps) {
               <div className="flex items-center justify-between">
                 <Badge category={category} />
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-400">{percent}%</span>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-16 text-right">
+                  <span className="text-xs text-slate-400">{percent}%</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 w-16 text-right">
                     {formatCurrency(total)}
                   </span>
                 </div>
               </div>
-              <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-indigo-500 rounded-full"
+                  className="h-full bg-blue-500 rounded-full"
                   style={{ width: `${percent}%` }}
                 />
               </div>

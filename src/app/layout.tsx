@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import { getSessionUser } from '@/lib/auth';
 
 const geistSans = Geist({
@@ -30,11 +31,14 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col sm:flex-row bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">
-        <Sidebar userName={userName} userEmail={user?.email} />
-        <main className="flex-1 overflow-auto">{children}</main>
+      <body className="min-h-full flex flex-col sm:flex-row bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
+        <ThemeProvider>
+          <Sidebar userName={userName} userEmail={user?.email} />
+          <main className="flex-1 overflow-auto min-w-0">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );
