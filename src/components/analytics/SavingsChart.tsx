@@ -16,11 +16,11 @@ const FILL = 'rgba(99,102,241,0.12)';
 export function SavingsChart({ series }: SavingsChartProps) {
   if (series.length < 2) {
     return (
-      <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-5">
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+      <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-5">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
           Savings Growth
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Add a few savings to see your growth over time.
         </p>
       </div>
@@ -43,12 +43,12 @@ export function SavingsChart({ series }: SavingsChartProps) {
   const total = series[series.length - 1].value;
 
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-5">
+    <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
           Savings Growth
         </h2>
-        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
           {formatCurrency(total)} saved
         </span>
       </div>
@@ -70,7 +70,7 @@ export function SavingsChart({ series }: SavingsChartProps) {
         />
       </svg>
 
-      <div className="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex items-center justify-between mt-3 text-xs text-slate-500 dark:text-slate-400">
         <span>
           {series[0].date} · {formatCurrency(series[0].value)}
         </span>

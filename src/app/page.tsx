@@ -55,8 +55,8 @@ export default async function DashboardPage() {
       change: 'Across all transactions',
       positive: totalBalance >= 0,
       icon: 'balance',
-      iconWrapClass: 'bg-indigo-50 dark:bg-indigo-900/30',
-      iconClass: 'text-indigo-600 dark:text-indigo-400',
+      iconWrapClass: 'bg-blue-50 dark:bg-blue-900/30',
+      iconClass: 'text-blue-600 dark:text-blue-400',
     },
     {
       label: 'Monthly Income',

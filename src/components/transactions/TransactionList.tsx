@@ -6,6 +6,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import type { Transaction, TransactionCategory } from '@/types';
 import { TransactionRow } from './TransactionRow';
 import { AddTransactionForm } from './AddTransactionForm';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 const CATEGORIES: ('All' | TransactionCategory)[] = [
   'All',
@@ -27,38 +28,33 @@ export function TransactionList({ transactions }: TransactionListProps) {
   const router = useRouter();
   const [selected, setSelected] = useState<'All' | TransactionCategory>('All');
   const [editing, setEditing] = useState<Transaction | null>(null);
-  const [deletingId, setDeletingId] = useState<string | number | null>(null);
+  const [pending, setPending] = useState<Transaction | null>(null);
 
   const filtered =
     selected === 'All'
       ? transactions
       : transactions.filter((t) => t.category === selected);
 
-  const handleDelete = async (t: Transaction) => {
-    if (!window.confirm(`Delete "${t.name}"?`)) return;
-    setDeletingId(t.id);
-    try {
-      const res = await fetch(`/api/transactions/${t.id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        window.alert(data.error || 'Failed to delete transaction');
-        return;
-      }
-      router.refresh();
-    } finally {
-      setDeletingId(null);
+  const handleConfirmDelete = async () => {
+    if (!pending) return;
+    const res = await fetch(`/api/transactions/${pending.id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to delete transaction');
     }
+    setPending(null);
+    router.refresh();
   };
 
   const iconBtn =
-    'p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-white dark:hover:bg-gray-800 transition-colors disabled:opacity-40';
+    'p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-colors disabled:opacity-40';
 
   return (
     <>
-      <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 overflow-x-auto">
+      <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
+        <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 overflow-x-auto">
           <div className="flex items-center gap-2 min-w-max">
             {CATEGORIES.map((cat) => (
               <button
@@ -66,8 +62,8 @@ export function TransactionList({ transactions }: TransactionListProps) {
                 onClick={() => setSelected(cat)}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                   selected === cat
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
                 }`}
               >
                 {cat}
@@ -77,11 +73,11 @@ export function TransactionList({ transactions }: TransactionListProps) {
         </div>
 
         {filtered.length === 0 ? (
-          <p className="px-5 py-12 text-center text-sm text-gray-400">
+          <p className="px-5 py-12 text-center text-sm text-slate-400">
             No transactions in this category.
           </p>
         ) : (
-          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
             {filtered.map((t) => (
               <TransactionRow
                 key={t.id}
@@ -96,8 +92,7 @@ export function TransactionList({ transactions }: TransactionListProps) {
                       <Pencil className="size-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(t)}
-                      disabled={deletingId === t.id}
+                      onClick={() => setPending(t)}
                       className={iconBtn}
                       aria-label="Delete transaction"
                     >
@@ -123,6 +118,20 @@ export function TransactionList({ transactions }: TransactionListProps) {
           }}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={pending !== null}
+        title="Delete transaction"
+        message={
+          pending ? (
+            <>
+              Delete <span className="font-semibold">{pending.name}</span>?
+            </>
+          ) : null
+        }
+        onConfirm={handleConfirmDelete}
+        onClose={() => setPending(null)}
+      />
     </>
   );
 }

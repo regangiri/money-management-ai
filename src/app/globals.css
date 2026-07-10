@@ -1,1 +1,23 @@
 @import 'tailwindcss';
+
+/* Class-based dark mode so next-themes can toggle it (instead of OS media query). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand accent — blue scale (replaces the old indigo). */
+  --color-brand-50: var(--color-blue-50);
+  --color-brand-100: var(--color-blue-100);
+  --color-brand-200: var(--color-blue-200);
+  --color-brand-300: var(--color-blue-300);
+  --color-brand-400: var(--color-blue-400);
+  --color-brand-500: var(--color-blue-500);
+  --color-brand-600: var(--color-blue-600);
+  --color-brand-700: var(--color-blue-700);
+  --color-brand-800: var(--color-blue-800);
+  --color-brand-900: var(--color-blue-900);
+}
+
+/* Avoid a flash of light-styled scrollbars etc. before the theme class is applied. */
+html {
+  color-scheme: light dark;
+}

@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 };
 
 const FIELD_CLASS =
-  'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+  'w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent';
 
 const LABEL_CLASS =
-  'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+  'block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1';
 
 export default async function SignupPage({
   searchParams,
@@ -21,20 +21,20 @@ export default async function SignupPage({
   const { error } = await searchParams;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
             Create your account
           </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Start managing your money in minutes
           </p>
         </div>
 
         <form
           action={signup}
-          className="space-y-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-6"
+          className="space-y-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-6"
         >
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-600 dark:text-red-400">
@@ -91,11 +91,11 @@ export default async function SignupPage({
           <SubmitButton label="Create account" pendingLabel="Creating..." />
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-4 text-center text-sm text-slate-500 dark:text-slate-400">
           Already have an account?{' '}
           <Link
             href="/login"
-            className="text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
           >
             Sign in
           </Link>

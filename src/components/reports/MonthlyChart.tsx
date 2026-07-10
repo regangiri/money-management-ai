@@ -9,8 +9,8 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
   const maxValue = Math.max(...data.flatMap((d) => [d.income, d.expenses]));
 
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-5">
-      <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-6">
+    <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-5">
+      <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-6">
         Income vs Expenses
       </h2>
 
@@ -22,7 +22,7 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
           >
             <div className="w-full flex items-end gap-0.5 h-28">
               <div
-                className="flex-1 bg-indigo-500 rounded-t-sm min-h-[2px]"
+                className="flex-1 bg-blue-500 rounded-t-sm min-h-[2px]"
                 style={{ height: `${(d.income / maxValue) * 100}%` }}
                 title={`Income: ${formatCurrency(d.income)}`}
               />
@@ -32,16 +32,16 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
                 title={`Expenses: ${formatCurrency(d.expenses)}`}
               />
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               {d.month}
             </span>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center gap-4 mt-5 pt-4 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex items-center gap-4 mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
         <div className="flex items-center gap-1.5">
-          <div className="size-2.5 rounded-sm bg-indigo-500" />
+          <div className="size-2.5 rounded-sm bg-blue-500" />
           <span>Income</span>
         </div>
         <div className="flex items-center gap-1.5">

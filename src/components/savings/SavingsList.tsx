@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { PiggyBank, Trash2 } from 'lucide-react';
 import { OTHERS_DESTINATION, type SavingEntry } from '@/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 type SavingsListProps = {
   savings: SavingEntry[];
@@ -12,54 +13,48 @@ type SavingsListProps = {
 
 export function SavingsList({ savings }: SavingsListProps) {
   const router = useRouter();
-  const [deletingId, setDeletingId] = useState<string | number | null>(null);
+  const [pending, setPending] = useState<SavingEntry | null>(null);
 
-  const handleDelete = async (saving: SavingEntry) => {
-    if (!window.confirm(`Delete this ${formatCurrency(saving.amount)} saving?`))
-      return;
-    setDeletingId(saving.id);
-    try {
-      const res = await fetch(`/api/savings/${saving.id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        window.alert(data.error || 'Failed to delete saving');
-        return;
-      }
-      router.refresh();
-    } finally {
-      setDeletingId(null);
+  const handleConfirmDelete = async () => {
+    if (!pending) return;
+    const res = await fetch(`/api/savings/${pending.id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to delete saving');
     }
+    setPending(null);
+    router.refresh();
   };
 
   if (savings.length === 0) {
     return (
-      <p className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 px-5 py-12 text-center text-sm text-gray-400">
+      <p className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 px-5 py-12 text-center text-sm text-slate-400">
         No savings yet. Add one to start building toward your goals.
       </p>
     );
   }
 
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 overflow-hidden">
-      <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+    <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
+      <ul className="divide-y divide-slate-100 dark:divide-slate-800">
         {savings.map((s) => {
           const toWishlist = s.destination !== OTHERS_DESTINATION;
           return (
-            <li key={s.id} className="flex items-center gap-4 px-5 py-3.5">
+            <li key={s.id} className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5">
               <div className="size-9 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0">
                 <PiggyBank className="size-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                <p className="text-sm font-medium text-slate-900 dark:text-white wrap-break-word">
                   {s.name}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-slate-400">
                   <span
                     className={
                       toWishlist
-                        ? 'text-indigo-600 dark:text-indigo-400'
+                        ? 'text-blue-600 dark:text-blue-400'
                         : undefined
                     }
                   >
@@ -72,9 +67,8 @@ export function SavingsList({ savings }: SavingsListProps) {
                 +{formatCurrency(s.amount)}
               </span>
               <button
-                onClick={() => handleDelete(s)}
-                disabled={deletingId === s.id}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-white dark:hover:bg-gray-800 transition-colors disabled:opacity-40 shrink-0"
+                onClick={() => setPending(s)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-colors shrink-0"
                 aria-label="Delete saving"
               >
                 <Trash2 className="size-4" />
@@ -83,6 +77,24 @@ export function SavingsList({ savings }: SavingsListProps) {
           );
         })}
       </ul>
+
+      <ConfirmDialog
+        isOpen={pending !== null}
+        title="Delete saving"
+        message={
+          pending ? (
+            <>
+              Delete this{' '}
+              <span className="font-semibold">
+                {formatCurrency(pending.amount)}
+              </span>{' '}
+              saving?
+            </>
+          ) : null
+        }
+        onConfirm={handleConfirmDelete}
+        onClose={() => setPending(null)}
+      />
     </div>
   );
 }

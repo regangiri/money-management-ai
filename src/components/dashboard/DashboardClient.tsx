@@ -56,19 +56,19 @@ export function DashboardClient({
 
   return (
     <>
-      <div className="p-6 sm:p-8 space-y-8 min-h-full bg-gray-50 dark:bg-gray-950">
+      <div className="p-6 sm:p-8 space-y-8 min-h-full bg-slate-50 dark:bg-slate-950">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
               Good morning, Regan
             </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Tuesday, June 17, 2026 — here&apos;s your financial overview
             </p>
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus className="size-4" />
             <span>Add Transaction</span>

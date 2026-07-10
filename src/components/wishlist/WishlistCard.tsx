@@ -5,7 +5,7 @@ import { formatCurrency, formatDate, pct } from '@/lib/utils';
 const PRIORITY_STYLES: Record<WishlistPriority, string> = {
   high: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400',
   medium: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
-  low: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  low: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
 };
 
 const STATUS_META: Record<WishlistStatus, { label: string; style: string }> = {
@@ -20,7 +20,7 @@ const STATUS_META: Record<WishlistStatus, { label: string; style: string }> = {
   },
   abandoned: {
     label: 'Abandoned',
-    style: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500',
+    style: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500',
   },
 };
 
@@ -44,16 +44,16 @@ export function WishlistCard({
   const remaining = Math.max(item.priceTarget - item.amountSaved, 0);
   const status = STATUS_META[item.status];
   const iconBtn =
-    'p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-white dark:hover:bg-gray-800 transition-colors disabled:opacity-40';
+    'p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-colors disabled:opacity-40';
 
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-5 flex flex-col gap-3">
+    <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+          <h3 className="font-semibold text-slate-900 dark:text-white wrap-break-word">
             {item.name}
           </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {item.category}
           </p>
         </div>
@@ -81,36 +81,36 @@ export function WishlistCard({
 
       <div>
         <div className="flex items-center justify-between text-sm mb-1">
-          <span className="text-gray-500 dark:text-gray-400">
+          <span className="text-slate-500 dark:text-slate-400">
             {formatCurrency(item.amountSaved)} of{' '}
             {formatCurrency(item.priceTarget)}
           </span>
-          <span className="font-medium text-gray-900 dark:text-white">
+          <span className="font-medium text-slate-900 dark:text-white">
             {progress}%
           </span>
         </div>
-        <div className="h-2 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+        <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
           <div
-            className="h-full rounded-full bg-indigo-500"
+            className="h-full rounded-full bg-blue-500"
             style={{ width: `${progress}%` }}
           />
         </div>
         {remaining > 0 && (
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             {formatCurrency(remaining)} to go
           </p>
         )}
       </div>
 
       {item.targetDate && (
-        <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
           <CalendarDays className="size-3.5" />
           <span>Target {formatDate(item.targetDate)}</span>
         </div>
       )}
 
       {item.notes && (
-        <p className="text-sm text-gray-600 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-3">
+        <p className="text-sm text-slate-600 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-3">
           {item.notes}
         </p>
       )}
