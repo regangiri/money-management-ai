@@ -6,6 +6,7 @@ import type {
   PricePoint,
   Quote,
 } from '@/types';
+import { roundMoney } from '@/lib/utils';
 
 // Pure functions — safe to run on the server (initial render) and on the
 // client (live price refresh). No I/O, no env access.
@@ -21,22 +22,28 @@ function fallbackQuote(h: Holding): Quote {
 }
 
 function buildPosition(h: Holding, q: Quote): PortfolioPosition {
-  const marketValue = q.price * h.quantity;
-  const costBasis = h.avgCost * h.quantity;
+  // Round prices to whole rupiah first, then derive every figure from those
+  // rounded inputs, so the displayed "price × quantity" always equals the
+  // displayed value (no 945-vs-946 drift from formatting decimals away).
+  const price = roundMoney(q.price);
+  const prevClose = roundMoney(q.prevClose);
+  const avgCost = roundMoney(h.avgCost);
+  const marketValue = price * h.quantity;
+  const costBasis = avgCost * h.quantity;
   const pnl = marketValue - costBasis;
   return {
     symbol: h.symbol,
     name: h.name || q.name,
     quantity: h.quantity,
-    avgCost: h.avgCost,
-    price: q.price,
-    prevClose: q.prevClose,
+    avgCost,
+    price,
+    prevClose,
     percentChange: q.percentChange,
     marketValue,
     costBasis,
     pnl,
     returnPct: costBasis > 0 ? (pnl / costBasis) * 100 : 0,
-    dayChange: (q.price - q.prevClose) * h.quantity,
+    dayChange: (price - prevClose) * h.quantity,
     weight: 0, // filled in once totals are known
   };
 }
