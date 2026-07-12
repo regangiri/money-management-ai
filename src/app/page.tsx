@@ -8,7 +8,8 @@ import {
   getTransactions,
   getWishlist,
 } from '@/lib/queries';
-import { formatCurrency, savingsRate } from '@/lib/utils';
+import { formatCurrency, savingsRate, sumExpenses } from '@/lib/utils';
+import { formatLongDate, startOfMonthISO, todayISO } from '@/lib/date';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,16 @@ export default async function DashboardPage() {
   const previous = monthly[monthly.length - 2];
 
   const totalBalance = transactions.reduce((sum, t) => sum + t.amount, 0);
+
+  // Budget-vs-actual for the current month, front-and-centre on the dashboard.
+  const monthStart = startOfMonthISO();
+  const today = todayISO();
+  const monthTransactions = transactions.filter(
+    (t) => t.date >= monthStart && t.date <= today,
+  );
+  const monthSpent = sumExpenses(monthTransactions);
+  const monthlyBudget = budgets.reduce((sum, b) => sum + b.total, 0);
+
   const income = current?.income ?? 0;
   const expenses = current?.expenses ?? 0;
   const saved = current?.savings ?? 0;
@@ -54,9 +65,9 @@ export default async function DashboardPage() {
 
   const stats: StatConfig[] = [
     {
-      label: 'Total Balance',
+      label: 'Cash Balance',
       value: formatCurrency(totalBalance),
-      change: 'Across all transactions',
+      change: 'Spendable — excludes investments',
       positive: totalBalance >= 0,
       icon: 'balance',
       iconWrapClass: 'bg-blue-50 dark:bg-blue-900/30',
@@ -100,7 +111,10 @@ export default async function DashboardPage() {
   return (
     <DashboardClient
       userName={userName}
+      todayLabel={formatLongDate()}
       stats={stats}
+      monthlyBudget={monthlyBudget}
+      monthSpent={monthSpent}
       recentTransactions={transactions.slice(0, 5)}
       overviewBudgets={budgets.slice(0, 4)}
       wishlistItems={wishlistPreview}

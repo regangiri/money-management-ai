@@ -12,9 +12,11 @@ import { useState } from 'react';
 import { StatCard } from '@/components/ui/StatCard';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { BudgetOverview } from '@/components/dashboard/BudgetOverview';
+import { BudgetSummary } from '@/components/dashboard/BudgetSummary';
 import { WishlistPreview } from '@/components/dashboard/WishlistPreview';
 import { HoldingsPreview } from '@/components/dashboard/HoldingsPreview';
 import { AddTransactionForm } from '@/components/transactions/AddTransactionForm';
+import { FEATURES } from '@/lib/features';
 import type {
   Budget,
   PortfolioPosition,
@@ -45,7 +47,10 @@ export type StatConfig = {
 
 type DashboardClientProps = {
   userName?: string;
+  todayLabel: string;
   stats: StatConfig[];
+  monthlyBudget: number;
+  monthSpent: number;
   recentTransactions: Transaction[];
   overviewBudgets: Budget[];
   wishlistItems: WishlistItem[];
@@ -54,7 +59,10 @@ type DashboardClientProps = {
 
 export function DashboardClient({
   userName,
+  todayLabel,
   stats,
+  monthlyBudget,
+  monthSpent,
   recentTransactions,
   overviewBudgets,
   wishlistItems,
@@ -68,10 +76,10 @@ export function DashboardClient({
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
-              Good morning, {userName}!
+              Good morning{userName ? `, ${userName}` : ''}!
             </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Tuesday, June 17, 2026 — here&apos;s your financial overview
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 text-pretty">
+              {todayLabel}
             </p>
           </div>
           <button
@@ -83,20 +91,25 @@ export function DashboardClient({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
           {stats.map(({ icon, ...stat }) => (
             <StatCard key={stat.label} icon={STAT_ICONS[icon]} {...stat} />
           ))}
         </div>
+
+        {/* Budgeting front-and-centre: budget-vs-actual for the month. */}
+        <BudgetSummary budget={monthlyBudget} spent={monthSpent} />
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <RecentTransactions transactions={recentTransactions} />
           <BudgetOverview budgets={overviewBudgets} />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div
+          className={`grid grid-cols-1 gap-6 ${FEATURES.analytics ? 'xl:grid-cols-2' : ''}`}
+        >
           <WishlistPreview items={wishlistItems} />
-          <HoldingsPreview positions={topHoldings} />
+          {FEATURES.analytics && <HoldingsPreview positions={topHoldings} />}
         </div>
       </div>
 

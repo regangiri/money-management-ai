@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { UpgradeNotice } from '@/components/UpgradeNotice';
+import { todayISO } from '@/lib/date';
 import type { Transaction, TransactionCategory } from '@/types';
 
 const CATEGORIES: TransactionCategory[] = [
@@ -140,7 +141,7 @@ export function AddTransactionForm({
             type="date"
             name="date"
             defaultValue={
-              transaction?.date ?? new Date().toISOString().split('T')[0]
+              transaction?.date ?? todayISO()
             }
             className={FIELD_CLASS}
             required

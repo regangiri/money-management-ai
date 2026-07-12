@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { todayISO } from '@/lib/date';
 import { OTHERS_DESTINATION, type WishlistItem } from '@/types';
 
 const FIELD_CLASS =
@@ -111,7 +112,7 @@ export function AddSavingForm({
           <input
             type="date"
             name="date"
-            defaultValue={new Date().toISOString().split('T')[0]}
+            defaultValue={todayISO()}
             className={FIELD_CLASS}
             required
           />

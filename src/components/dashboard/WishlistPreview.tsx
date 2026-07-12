@@ -11,10 +11,10 @@ export function WishlistPreview({ items }: WishlistPreviewProps) {
     <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
         <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
-          Wishlist
+          Goals
         </h2>
         <Link
-          href="/wishlist"
+          href="/goals"
           className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
         >
           View all
@@ -23,7 +23,7 @@ export function WishlistPreview({ items }: WishlistPreviewProps) {
 
       {items.length === 0 ? (
         <p className="px-5 py-8 text-center text-sm text-slate-400">
-          No wishlist items yet.
+          No goals yet.
         </p>
       ) : (
         <div className="p-5 space-y-5">
