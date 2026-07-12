@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
+import { BottomNav } from '@/components/BottomNav';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { DemoBanner } from '@/components/DemoBanner';
 import { getSessionUser } from '@/lib/auth';
@@ -39,10 +40,11 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col sm:flex-row bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
         <ThemeProvider>
           <Sidebar userName={userName} userEmail={user?.email} />
-          <main className="flex-1 overflow-auto min-w-0">
+          <main className="flex-1 overflow-auto min-w-0 pb-20 sm:pb-0">
             {isDemo && <DemoBanner />}
             {children}
           </main>
+          <BottomNav />
         </ThemeProvider>
       </body>
     </html>
