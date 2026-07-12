@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { login } from '@/app/auth/actions';
+import { login, startDemo } from '@/app/auth/actions';
 import { SubmitButton } from '@/components/auth/SubmitButton';
 
 export const metadata: Metadata = {
@@ -78,6 +78,20 @@ export default async function LoginPage({
           </div>
 
           <SubmitButton label="Sign in" pendingLabel="Signing in..." />
+        </form>
+
+        <div className="my-4 flex items-center gap-3">
+          <span className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+          <span className="text-xs text-slate-400">or</span>
+          <span className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+        </div>
+
+        <form action={startDemo}>
+          <SubmitButton
+            label="Try the demo — no account needed"
+            pendingLabel="Starting demo..."
+            variant="secondary"
+          />
         </form>
 
         <p className="mt-4 text-center text-sm text-slate-500 dark:text-slate-400">

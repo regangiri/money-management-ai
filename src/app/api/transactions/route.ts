@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getTransactions } from '@/lib/queries';
+import { checkResourceLimit, limitReachedResponse } from '@/lib/entitlements';
 
 export async function GET() {
   return NextResponse.json(await getTransactions());
@@ -16,6 +17,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const limit = await checkResourceLimit(supabase, user, 'transactions');
+    if (!limit.allowed) return limitReachedResponse('transactions', limit.limit);
 
     const body = await request.json();
     const { name, category, amount, date, note } = body;

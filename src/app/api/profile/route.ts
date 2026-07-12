@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getProfile } from '@/lib/queries';
+import { planForUser } from '@/lib/plans';
 
 export async function GET() {
   return NextResponse.json(await getProfile());
@@ -15,6 +16,18 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!planForUser(user).features.editProfile) {
+      return NextResponse.json(
+        {
+          error:
+            'Profile editing is disabled in the demo. Register a free account to manage your details.',
+          code: 'FEATURE_LOCKED',
+          feature: 'editProfile',
+        },
+        { status: 403 },
+      );
     }
 
     const body = await request.json();

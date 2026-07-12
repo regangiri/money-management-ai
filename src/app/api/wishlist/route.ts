@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getWishlist } from '@/lib/queries';
+import { checkResourceLimit, limitReachedResponse } from '@/lib/entitlements';
 import type { WishlistPriority, WishlistStatus } from '@/types';
 
 const PRIORITIES: WishlistPriority[] = ['high', 'medium', 'low'];
@@ -20,6 +21,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const limit = await checkResourceLimit(supabase, user, 'wishlist');
+    if (!limit.allowed) return limitReachedResponse('wishlist', limit.limit);
 
     const body = await request.json();
     const name = typeof body.name === 'string' ? body.name.trim() : '';
