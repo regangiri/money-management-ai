@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getBudgets } from '@/lib/queries';
+import { checkResourceLimit, limitReachedResponse } from '@/lib/entitlements';
 
 export async function GET() {
   return NextResponse.json(await getBudgets());
@@ -33,6 +34,12 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    const limit = await checkResourceLimit(supabase, user, 'budgets', {
+      uniqueColumn: 'category',
+      uniqueValue: category,
+    });
+    if (!limit.allowed) return limitReachedResponse('budgets', limit.limit);
 
     const { data, error } = await supabase
       .from('budgets')

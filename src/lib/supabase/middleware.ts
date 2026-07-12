@@ -53,8 +53,13 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Authenticated users shouldn't sit on the login/signup screens.
-  if (user && (pathname === '/login' || pathname === '/signup')) {
+  // Registered users shouldn't sit on the login/signup screens. Demo
+  // (anonymous) users are allowed through so they can upgrade via /signup.
+  if (
+    user &&
+    !user.is_anonymous &&
+    (pathname === '/login' || pathname === '/signup')
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);

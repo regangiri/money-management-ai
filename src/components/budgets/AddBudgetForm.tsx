@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { UpgradeNotice } from '@/components/UpgradeNotice';
 import type { Budget } from '@/types';
 
 const PREDEFINED_CATEGORIES = [
@@ -30,11 +31,13 @@ export function AddBudgetForm({
   const editMode = !!budget;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [limitReached, setLimitReached] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    setLimitReached(false);
     setSuccessMsg('');
     setLoading(true);
 
@@ -66,6 +69,12 @@ export function AddBudgetForm({
 
       if (!res.ok) {
         const data = await res.json();
+        if (res.status === 403 && data.code === 'LIMIT_REACHED') {
+          setLimitReached(true);
+          setError(data.error);
+          setLoading(false);
+          return;
+        }
         throw new Error(data.error || 'Failed to save budget');
       }
 
@@ -88,11 +97,14 @@ export function AddBudgetForm({
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-600 dark:text-red-400">
-            {error}
-          </div>
-        )}
+        {error &&
+          (limitReached ? (
+            <UpgradeNotice message={error} />
+          ) : (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-600 dark:text-red-400">
+              {error}
+            </div>
+          ))}
 
         {successMsg && (
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 text-sm text-green-600 dark:text-green-400">
