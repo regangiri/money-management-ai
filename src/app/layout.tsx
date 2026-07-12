@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { DemoBanner } from '@/components/DemoBanner';
 import { getSessionUser } from '@/lib/auth';
 
 const geistSans = Geist({
@@ -27,6 +28,7 @@ export default async function RootLayout({
 }>) {
   const user = await getSessionUser();
   const userName = (user?.user_metadata?.name as string) || undefined;
+  const isDemo = !!user?.is_anonymous;
 
   return (
     <html
@@ -37,7 +39,10 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col sm:flex-row bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
         <ThemeProvider>
           <Sidebar userName={userName} userEmail={user?.email} />
-          <main className="flex-1 overflow-auto min-w-0">{children}</main>
+          <main className="flex-1 overflow-auto min-w-0">
+            {isDemo && <DemoBanner />}
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>
