@@ -7,9 +7,13 @@ import { AddSavingForm } from '@/components/savings/AddSavingForm';
 
 type AddSavingButtonProps = {
   wishlistItems: WishlistItem[];
+  label?: string;
 };
 
-export function AddSavingButton({ wishlistItems }: AddSavingButtonProps) {
+export function AddSavingButton({
+  wishlistItems,
+  label = 'Add Saving',
+}: AddSavingButtonProps) {
   const [showForm, setShowForm] = useState(false);
 
   return (
@@ -19,7 +23,7 @@ export function AddSavingButton({ wishlistItems }: AddSavingButtonProps) {
         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
       >
         <Plus className="size-4" />
-        <span>Add Saving</span>
+        <span>{label}</span>
       </button>
 
       <AddSavingForm

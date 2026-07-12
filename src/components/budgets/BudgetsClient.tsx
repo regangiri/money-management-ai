@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Pencil, Plus, Trash2, Wand2 } from 'lucide-react';
+import { ChartPie, Pencil, Plus, Trash2, Wand2 } from 'lucide-react';
 import type { Budget, Leak } from '@/types';
 import { formatCurrency, pct } from '@/lib/utils';
 import { BudgetCard } from '@/components/budgets/BudgetCard';
@@ -97,32 +97,54 @@ export function BudgetsClient({ budgets, salary, leaks }: BudgetsClientProps) {
 
         <BudgetLeaks leaks={leaks} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {budgets.map((budget) => (
-            <BudgetCard
-              key={budget.id}
-              budget={budget}
-              action={
-                <div className="flex items-center gap-0.5">
-                  <button
-                    onClick={() => setEditing(budget)}
-                    className={iconBtn}
-                    aria-label="Edit budget"
-                  >
-                    <Pencil className="size-3.5" />
-                  </button>
-                  <button
-                    onClick={() => setPending(budget)}
-                    className={iconBtn}
-                    aria-label="Delete budget"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                </div>
-              }
-            />
-          ))}
-        </div>
+        {budgets.length === 0 ? (
+          <div className="border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 sm:p-8 text-center max-w-lg mx-auto">
+            <div className="mx-auto size-12 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+              <ChartPie className="size-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h2 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">
+              Set your first budget
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 wrap-break-word">
+              Pick a category and a monthly limit — we&apos;ll track your
+              spending against it so you always know where you stand.
+            </p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="mt-5 inline-flex items-center justify-center gap-2 min-h-11 px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="size-4" />
+              Create a budget
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {budgets.map((budget) => (
+              <BudgetCard
+                key={budget.id}
+                budget={budget}
+                action={
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      onClick={() => setEditing(budget)}
+                      className={iconBtn}
+                      aria-label="Edit budget"
+                    >
+                      <Pencil className="size-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setPending(budget)}
+                      className={iconBtn}
+                      aria-label="Delete budget"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <AddBudgetForm
