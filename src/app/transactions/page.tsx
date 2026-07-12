@@ -9,6 +9,7 @@ import {
 } from '@/lib/utils';
 import { TransactionList } from '@/components/transactions/TransactionList';
 import { AddTransactionButton } from '@/components/transactions/AddTransactionButton';
+import { RecurringTransactions } from '@/components/transactions/RecurringTransactions';
 import { DateFilter } from '@/components/transactions/DateFilter';
 
 export const metadata: Metadata = {
@@ -38,8 +39,8 @@ export default async function TransactionsPage({
 
   return (
     <div className="p-6 sm:p-8 space-y-6 min-h-full bg-slate-50 dark:bg-slate-950">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
             Transactions
           </h1>
@@ -48,7 +49,10 @@ export default async function TransactionsPage({
             {filtered ? ` of ${all.length}` : ''} transactions
           </p>
         </div>
-        <AddTransactionButton />
+        <div className="flex items-center gap-2">
+          <RecurringTransactions />
+          <AddTransactionButton />
+        </div>
       </div>
 
       <Suspense fallback={null}>

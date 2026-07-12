@@ -7,6 +7,7 @@ import type {
   Transaction,
   WishlistItem,
 } from '@/types';
+import { addDaysISO, getNow, parseISODate, toISODate } from '@/lib/date';
 
 export const profile: Profile = {
   name: 'Regan',
@@ -16,7 +17,11 @@ export const profile: Profile = {
   salary: 5200,
 };
 
-export const transactions: Transaction[] = [
+// Authored on a fixed June-2026 timeline, then shifted below so the newest
+// transaction always lands on "today". This keeps the mock/offline dataset
+// internally consistent with the single date source (no future-dated rows,
+// no data outside the labelled window).
+const RAW_TRANSACTIONS: Transaction[] = [
   {
     id: 1,
     name: 'Grocery Store',
@@ -182,6 +187,23 @@ export const transactions: Transaction[] = [
   },
 ];
 
+// Shift the whole set so its most recent date is today, preserving the relative
+// spacing between rows. Derived once at module load from the single date source.
+const SHIFT_DAYS = (() => {
+  const newest = RAW_TRANSACTIONS.reduce(
+    (max, t) => (t.date > max ? t.date : max),
+    RAW_TRANSACTIONS[0].date,
+  );
+  return Math.round(
+    (getNow().getTime() - parseISODate(newest).getTime()) / 86_400_000,
+  );
+})();
+
+export const transactions: Transaction[] = RAW_TRANSACTIONS.map((t) => ({
+  ...t,
+  date: addDaysISO(t.date, SHIFT_DAYS),
+}));
+
 export const budgets: Budget[] = [
   {
     id: 1,
@@ -333,11 +355,11 @@ export function mockTimeSeries(
   const next = mulberry32(hashString(symbol));
   const values: { date: string; close: number }[] = [];
   let close = quote.price;
-  const today = new Date();
+  const today = getNow();
   for (let i = 0; i < points; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() - i);
-    values.push({ date: date.toISOString().slice(0, 10), close: +close.toFixed(2) });
+    values.push({ date: toISODate(date), close: +close.toFixed(2) });
     // Walk backwards from today's price with small deterministic steps.
     close = close / (1 + (next() - 0.5) * 0.03);
   }

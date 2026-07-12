@@ -1,45 +1,22 @@
 'use client';
 
-import {
-  ArrowRightLeft,
-  ChartPie,
-  FileText,
-  Gift,
-  LayoutDashboard,
-  LineChart,
-  LogOut,
-  Menu,
-  PiggyBank,
-  User,
-  X,
-} from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { signOut } from '@/app/auth/actions';
 import { ThemeToggle } from '@/components/ThemeToggle';
-
-const NAV_ITEMS = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/transactions', label: 'Transactions', icon: ArrowRightLeft },
-  { href: '/budgets', label: 'Budgets', icon: ChartPie },
-  { href: '/savings', label: 'Savings', icon: PiggyBank },
-  { href: '/wishlist', label: 'Wishlist', icon: Gift },
-  { href: '/analytics', label: 'Analytics', icon: LineChart },
-  { href: '/reports', label: 'Reports', icon: FileText },
-  { href: '/profile', label: 'Profile', icon: User },
-];
+import { ALL_NAV } from '@/lib/nav';
 
 type SidebarProps = {
   userName?: string;
   userEmail?: string;
 };
 
+// Desktop-only navigation rail. On mobile the BottomNav takes over, so this is
+// hidden below `sm` and never occupies mobile layout width.
 const Sidebar = ({ userName, userEmail }: SidebarProps) => {
-  // Desktop: collapsed = icon rail vs full width
   const [collapsed, setCollapsed] = useState(false);
-  // Mobile: drawer open vs closed (closed by default, takes 0 width)
-  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
   // The auth screens render full-bleed without the app chrome.
@@ -48,16 +25,39 @@ const Sidebar = ({ userName, userEmail }: SidebarProps) => {
   const displayName = userName || 'Account';
   const initial = (userName || userEmail || '?').charAt(0).toUpperCase();
 
-  const NavContent = (
-    <>
-      <nav className="flex flex-col gap-1 p-2 flex-1">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href;
+  return (
+    <aside
+      className={`
+        hidden sm:flex flex-col h-screen shrink-0
+        bg-white dark:bg-slate-900
+        border-r border-slate-200 dark:border-slate-700
+        transition-all duration-300 ease-in-out
+        ${collapsed ? 'w-16' : 'w-56'}
+      `}
+    >
+      <div className="flex items-center h-16 px-3 border-b border-slate-200 dark:border-slate-700 gap-3">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="p-1.5 rounded-md shrink-0 text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-colors"
+        >
+          <Menu className="size-4" />
+        </button>
+        {!collapsed && (
+          <span className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+            Money Manager
+          </span>
+        )}
+      </div>
+
+      <nav className="flex flex-col gap-1 p-2 flex-1 overflow-y-auto">
+        {ALL_NAV.map(({ href, label, icon: Icon }) => {
+          const isActive =
+            href === '/' ? pathname === '/' : pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
-              onClick={() => setMobileOpen(false)}
               title={collapsed ? label : undefined}
               className={`
                 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
@@ -76,8 +76,7 @@ const Sidebar = ({ userName, userEmail }: SidebarProps) => {
                     : 'text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-white'
                 }`}
               />
-              {/* Label hidden only when desktop-collapsed; always shown in mobile drawer */}
-              <span className={collapsed ? 'truncate' : ' sm:block truncate'}>
+              <span className={collapsed ? 'sm:hidden' : 'truncate'}>
                 {label}
               </span>
               {isActive && (
@@ -89,131 +88,47 @@ const Sidebar = ({ userName, userEmail }: SidebarProps) => {
       </nav>
 
       <div className="p-2 border-t border-slate-200 dark:border-slate-700">
-        {/* Theme toggle — full segmented control in the drawer / expanded rail,
-            compact icon button on the collapsed desktop rail. */}
         <div className="px-1 pb-2">
-          <div className={collapsed ? 'sm:hidden' : ''}>
+          <div className={collapsed ? 'hidden' : ''}>
             <ThemeToggle />
           </div>
-          <div className={collapsed ? 'hidden sm:block' : 'hidden'}>
+          <div className={collapsed ? 'block' : 'hidden'}>
             <ThemeToggle compact />
           </div>
         </div>
 
         <div
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg ${collapsed ? 'sm:justify-center' : ''}`}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg ${collapsed ? 'justify-center' : ''}`}
         >
           <div className="size-7 rounded-full bg-blue-100 dark:bg-blue-900 shrink-0 flex items-center justify-center text-xs font-semibold text-blue-600 dark:text-blue-400">
             {initial}
           </div>
-          <div
-            className={
-              collapsed
-                ? ' sm:hidden flex flex-col min-w-0'
-                : 'flex flex-col min-w-0'
-            }
-          >
-            <span className="text-xs font-medium text-slate-800 dark:text-white truncate">
-              {displayName}
-            </span>
-            {userEmail && (
-              <span className="text-xs text-slate-400 truncate">
-                {userEmail}
+          {!collapsed && (
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-medium text-slate-800 dark:text-white truncate">
+                {displayName}
               </span>
-            )}
-          </div>
+              {userEmail && (
+                <span className="text-xs text-slate-400 truncate">
+                  {userEmail}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <form action={signOut}>
           <button
             type="submit"
             title={collapsed ? 'Sign out' : undefined}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors ${collapsed ? 'sm:justify-center' : ''}`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors ${collapsed ? 'justify-center' : ''}`}
           >
             <LogOut className="size-4 shrink-0" />
-            <span className={collapsed ? 'sm:hidden' : 'truncate'}>
-              Sign out
-            </span>
+            <span className={collapsed ? 'hidden' : 'truncate'}>Sign out</span>
           </button>
         </form>
       </div>
-    </>
-  );
-
-  return (
-    <>
-      {/* Mobile top bar — always visible, costs a fixed header height, not sidebar width */}
-      <div className="sm:hidden flex items-center h-14 px-3 ">
-        <button
-          onClick={() => setMobileOpen(true)}
-          aria-label="Open menu"
-          className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-colors"
-        >
-          <Menu className="size-5" />
-        </button>
-      </div>
-
-      {/* Mobile overlay backdrop */}
-      {mobileOpen && (
-        <div
-          className="sm:hidden fixed inset-0 bg-black/40 z-40"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-
-      {/* Mobile drawer — slides in, fixed position, takes 0 layout width when closed */}
-      <aside
-        className={`
-          sm:hidden fixed top-0 left-0 h-screen w-64 z-50
-          bg-white dark:bg-slate-900
-          border-r border-slate-200 dark:border-slate-700
-          transition-transform duration-300 ease-in-out
-          flex flex-col
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
-      >
-        <div className="flex items-center justify-between h-14 px-3 border-b border-slate-200 dark:border-slate-700">
-          <span className="text-sm font-semibold text-slate-900 dark:text-white">
-            My App
-          </span>
-          <button
-            onClick={() => setMobileOpen(false)}
-            aria-label="Close menu"
-            className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
-        {NavContent}
-      </aside>
-
-      {/* Desktop sidebar — push layout, collapsible rail */}
-      <aside
-        className={`
-          hidden sm:flex flex-col h-screen shrink-0
-          bg-white dark:bg-slate-900
-          border-r border-slate-200 dark:border-slate-700
-          transition-all duration-300 ease-in-out
-          ${collapsed ? 'w-16' : 'w-56'}
-        `}
-      >
-        <div className="flex items-center h-16 px-3 border-b border-slate-200 dark:border-slate-700 gap-3">
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="p-1.5 rounded-md shrink-0 text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-colors"
-          >
-            <Menu className="size-4" />
-          </button>
-          {!collapsed && (
-            <span className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-              My App
-            </span>
-          )}
-        </div>
-        {NavContent}
-      </aside>
-    </>
+    </aside>
   );
 };
 
