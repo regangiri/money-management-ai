@@ -1,6 +1,7 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 
 type SubmitButtonProps = {
   label: string;
@@ -27,7 +28,7 @@ export function SubmitButton({
       disabled={pending}
       className={`w-full px-4 py-2 rounded-lg transition-colors disabled:opacity-50 ${VARIANTS[variant]}`}
     >
-      {pending ? pendingLabel : label}
+      {pending ? <ButtonSpinner label={pendingLabel} /> : label}
     </button>
   );
 }

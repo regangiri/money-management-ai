@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { todayISO } from '@/lib/date';
 import { OTHERS_DESTINATION, type WishlistItem } from '@/types';
 
@@ -160,7 +161,7 @@ export function AddSavingForm({
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             disabled={loading}
           >
-            {loading ? 'Saving...' : 'Add Saving'}
+            {loading ? <ButtonSpinner label="Saving…" /> : 'Add Saving'}
           </button>
         </div>
       </form>

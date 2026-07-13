@@ -69,15 +69,16 @@ export function ThemeToggle({ compact = false }: ThemeToggleProps) {
             key={value}
             role="radio"
             aria-checked={active}
+            aria-label={label}
+            title={label}
             onClick={() => setTheme(value)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
+            className={`flex-1 min-w-0 flex items-center justify-center py-1.5 rounded-md transition-colors ${
               active
                 ? 'bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
             }`}
           >
-            <Icon className="size-3.5 shrink-0" />
-            {label}
+            <Icon className="size-4 shrink-0" />
           </button>
         );
       })}
