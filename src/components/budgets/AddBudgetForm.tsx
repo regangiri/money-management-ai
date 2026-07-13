@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { UpgradeNotice } from '@/components/UpgradeNotice';
 import type { Budget } from '@/types';
 
@@ -173,7 +174,13 @@ export function AddBudgetForm({
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             disabled={loading}
           >
-            {loading ? 'Saving...' : editMode ? 'Save changes' : 'Add Budget'}
+            {loading ? (
+              <ButtonSpinner label="Saving…" />
+            ) : editMode ? (
+              'Save changes'
+            ) : (
+              'Add Budget'
+            )}
           </button>
         </div>
       </form>

@@ -4,6 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Repeat, Trash2 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { UpgradeNotice } from '@/components/UpgradeNotice';
 import { todayISO } from '@/lib/date';
 import { formatCurrency } from '@/lib/utils';
@@ -190,7 +191,7 @@ export function RecurringTransactions() {
                     disabled={busy === item.id}
                     className="shrink-0 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
                   >
-                    {busy === item.id ? 'Adding…' : 'Add'}
+                    {busy === item.id ? <ButtonSpinner label="Adding…" /> : 'Add'}
                   </button>
                   <button
                     onClick={() => removeTemplate(item.id)}

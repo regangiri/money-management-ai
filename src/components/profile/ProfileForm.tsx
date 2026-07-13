@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import type { Profile } from '@/types';
 
 type ProfileFormProps = {
@@ -149,7 +150,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           disabled={status === 'saving'}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
-          {status === 'saving' ? 'Saving...' : 'Save changes'}
+          {status === 'saving' ? (
+            <ButtonSpinner label="Saving…" />
+          ) : (
+            'Save changes'
+          )}
         </button>
       </div>
     </form>

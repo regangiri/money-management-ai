@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Modal } from './Modal';
+import { ButtonSpinner } from './Spinner';
 
 type ConfirmDialogProps = {
   isOpen: boolean;
@@ -81,7 +82,7 @@ export function ConfirmDialog({
             disabled={loading}
             className={`min-h-10 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 disabled:opacity-60 ${confirmClasses}`}
           >
-            {loading ? 'Working…' : confirmLabel}
+            {loading ? <ButtonSpinner label="Working…" /> : confirmLabel}
           </button>
         </div>
       </div>

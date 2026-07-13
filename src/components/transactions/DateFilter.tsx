@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SlidersHorizontal } from 'lucide-react';
 import { currentMonthRange, lastNDaysRange } from '@/lib/date';
+import { Spinner } from '@/components/ui/Spinner';
 
 export function DateFilter() {
   const router = useRouter();
@@ -13,13 +14,18 @@ export function DateFilter() {
   // Manual From/To are tucked away by default to save mobile space; auto-open
   // if a custom range is already applied so it stays visible/editable.
   const [showCustom, setShowCustom] = useState(!!(from || to));
+  // Marks the URL change as a transition so we can surface a loading indicator
+  // while the transactions refetch on the server.
+  const [isPending, startTransition] = useTransition();
 
   const apply = (nextFrom: string, nextTo: string) => {
     const query = new URLSearchParams();
     if (nextFrom) query.set('from', nextFrom);
     if (nextTo) query.set('to', nextTo);
     const qs = query.toString();
-    router.push(qs ? `/transactions?${qs}` : '/transactions');
+    startTransition(() => {
+      router.push(qs ? `/transactions?${qs}` : '/transactions');
+    });
   };
 
   const thisMonth = () => {
@@ -67,6 +73,15 @@ export function DateFilter() {
           >
             Clear
           </button>
+        )}
+        {isPending && (
+          <span
+            role="status"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400"
+          >
+            <Spinner className="size-3.5" />
+            Updating transactions…
+          </span>
         )}
       </div>
 
