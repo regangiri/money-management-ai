@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { formatCurrency } from '@/lib/utils';
 
 // Default share of monthly salary allocated to each budget category.
@@ -164,7 +165,7 @@ export function AutoAllocateForm({
             disabled={loading || !month}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Allocating...' : 'Allocate'}
+            {loading ? <ButtonSpinner label="Allocating…" /> : 'Allocate'}
           </button>
         </div>
       </div>

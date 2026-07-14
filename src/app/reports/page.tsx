@@ -5,7 +5,13 @@ import {
   getSavings,
   getTransactions,
 } from '@/lib/queries';
-import { formatCurrency } from '@/lib/utils';
+import {
+  formatCurrency,
+  sumExpenses,
+  sumIncome,
+  sumSavings,
+} from '@/lib/utils';
+import { startOfYearISO, todayISO, ytdRangeLabel } from '@/lib/date';
 import { MonthlyChart } from '@/components/reports/MonthlyChart';
 import { CategoryBreakdown } from '@/components/reports/CategoryBreakdown';
 import { SavingsBreakdown } from '@/components/reports/SavingsBreakdown';
@@ -24,10 +30,19 @@ export default async function ReportsPage() {
     getSavings(),
   ]);
 
-  const ytdIncome = monthlySummaries.reduce((sum, m) => sum + m.income, 0);
-  const ytdExpenses = monthlySummaries.reduce((sum, m) => sum + m.expenses, 0);
+  // Year-to-date figures come straight from transactions inside the actual
+  // window (Jan 1 → today of the current year), so nothing dated outside the
+  // labelled range can leak into the totals.
+  const yearStart = startOfYearISO();
+  const today = todayISO();
+  const ytdTransactions = transactions.filter(
+    (t) => t.date >= yearStart && t.date <= today,
+  );
+  const ytdIncome = sumIncome(ytdTransactions);
+  const ytdExpenses = sumExpenses(ytdTransactions);
   // Money actually set aside, not income left unspent.
-  const ytdSavings = monthlySummaries.reduce((sum, m) => sum + m.savings, 0);
+  const ytdSavings = sumSavings(ytdTransactions);
+  const monthsElapsed = new Date().getMonth() + 1;
   const savingsRate =
     ytdIncome > 0 ? Math.round((ytdSavings / ytdIncome) * 100) : 0;
 
@@ -43,7 +58,7 @@ export default async function ReportsPage() {
           Reports
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Year-to-date — January through June 2026
+          Year-to-date — {ytdRangeLabel()}
         </p>
       </div>
 
@@ -124,7 +139,7 @@ export default async function ReportsPage() {
                 Monthly Avg
               </span>
               <span className="text-sm font-bold text-slate-900 dark:text-white">
-                {formatCurrency(ytdSavings / monthlySummaries.length)}
+                {formatCurrency(ytdSavings / monthsElapsed)}
               </span>
             </div>
           </div>

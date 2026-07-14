@@ -35,6 +35,14 @@ export function TransactionList({ transactions }: TransactionListProps) {
       ? transactions
       : transactions.filter((t) => t.category === selected);
 
+  // Only show "All" plus categories that actually have transactions in view,
+  // so mobile users aren't scrolling past empty filters. Keep the currently
+  // selected category visible even if a delete just emptied it.
+  const present = new Set(transactions.map((t) => t.category));
+  const categories = CATEGORIES.filter(
+    (cat) => cat === 'All' || present.has(cat) || cat === selected,
+  );
+
   const handleConfirmDelete = async () => {
     if (!pending) return;
     const res = await fetch(`/api/transactions/${pending.id}`, {
@@ -54,22 +62,26 @@ export function TransactionList({ transactions }: TransactionListProps) {
   return (
     <>
       <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
-        <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 overflow-x-auto">
-          <div className="flex items-center gap-2 min-w-max">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelected(cat)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  selected === cat
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+        <div className="relative border-b border-slate-100 dark:border-slate-800">
+          <div className="px-4 sm:px-5 py-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex items-center gap-2 min-w-max pr-6 sm:pr-0">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelected(cat)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    selected === cat
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
+          {/* Fade hint that more chips exist to the right (mobile only). */}
+          <div className="sm:hidden pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white dark:from-slate-900 to-transparent" />
         </div>
 
         {filtered.length === 0 ? (

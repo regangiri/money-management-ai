@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { UpgradeNotice } from '@/components/UpgradeNotice';
 import {
   WISHLIST_CATEGORIES,
@@ -266,11 +267,13 @@ export function AddWishlistForm({
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             disabled={loading}
           >
-            {loading
-              ? 'Saving...'
-              : editMode
-                ? 'Save changes'
-                : 'Add to Wishlist'}
+            {loading ? (
+              <ButtonSpinner label="Saving…" />
+            ) : editMode ? (
+              'Save changes'
+            ) : (
+              'Add to Wishlist'
+            )}
           </button>
         </div>
       </form>

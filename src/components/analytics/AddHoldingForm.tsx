@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { UpgradeNotice } from '@/components/UpgradeNotice';
 import type { SymbolMatch } from '@/lib/market';
 
@@ -243,7 +244,13 @@ export function AddHoldingForm({
             disabled={loading}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Adding...' : isWatchlist ? 'Add to watchlist' : 'Add holding'}
+            {loading ? (
+              <ButtonSpinner label="Adding…" />
+            ) : isWatchlist ? (
+              'Add to watchlist'
+            ) : (
+              'Add holding'
+            )}
           </button>
         </div>
       </form>
