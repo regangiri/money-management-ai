@@ -1,12 +1,14 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { recordChange } from '@/lib/changelog';
 
 function revalidate() {
   revalidatePath('/');
   revalidatePath('/transactions');
   revalidatePath('/reports');
   revalidatePath('/budgets');
+  revalidatePath('/activity');
 }
 
 export async function PATCH(
@@ -55,6 +57,15 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    const updatedName = (data?.[0]?.name as string) ?? 'transaction';
+    await recordChange(
+      supabase,
+      user.id,
+      'transaction',
+      'updated',
+      `Edited "${updatedName}"`,
+    );
+
     revalidate();
     return NextResponse.json(data?.[0]);
   } catch (err) {
@@ -80,6 +91,15 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    // Grab the name before deleting so the changelog entry is meaningful.
+    const { data: existing } = await supabase
+      .from('transactions')
+      .select('name, category')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
     const { error } = await supabase
       .from('transactions')
       .delete()
@@ -90,6 +110,17 @@ export async function DELETE(
       console.error('Delete error:', error);
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+
+    const isSaving = existing?.category === 'Savings';
+    await recordChange(
+      supabase,
+      user.id,
+      isSaving ? 'saving' : 'transaction',
+      'deleted',
+      existing?.name
+        ? `Deleted "${existing.name}"`
+        : 'Deleted a transaction',
+    );
 
     revalidate();
     return NextResponse.json({ ok: true });

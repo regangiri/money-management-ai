@@ -1,11 +1,14 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { recordChange } from '@/lib/changelog';
+import { formatCurrency } from '@/lib/utils';
 
 function revalidate() {
   revalidatePath('/budgets');
   revalidatePath('/reports');
   revalidatePath('/');
+  revalidatePath('/activity');
 }
 
 export async function PATCH(
@@ -43,6 +46,15 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    const category = (data?.[0]?.category as string) ?? 'budget';
+    await recordChange(
+      supabase,
+      user.id,
+      'budget',
+      'updated',
+      `Set ${category} budget to ${formatCurrency(total)}`,
+    );
+
     revalidate();
     return NextResponse.json(data?.[0]);
   } catch (err) {
@@ -68,6 +80,14 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    const { data: existing } = await supabase
+      .from('budgets')
+      .select('category')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
     const { error } = await supabase
       .from('budgets')
       .delete()
@@ -78,6 +98,16 @@ export async function DELETE(
       console.error('Delete error:', error);
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+
+    await recordChange(
+      supabase,
+      user.id,
+      'budget',
+      'deleted',
+      existing?.category
+        ? `Deleted ${existing.category} budget`
+        : 'Deleted a budget',
+    );
 
     revalidate();
     return NextResponse.json({ ok: true });

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getWishlist } from '@/lib/queries';
 import { checkResourceLimit, limitReachedResponse } from '@/lib/entitlements';
+import { recordChange } from '@/lib/changelog';
 import type { WishlistPriority, WishlistStatus } from '@/types';
 
 const PRIORITIES: WishlistPriority[] = ['high', 'medium', 'low'];
@@ -79,7 +80,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    await recordChange(
+      supabase,
+      user.id,
+      'goal',
+      'created',
+      `Added goal "${name}"`,
+    );
+
     revalidatePath('/wishlist');
+    revalidatePath('/goals');
+    revalidatePath('/activity');
 
     return NextResponse.json(data?.[0], { status: 201 });
   } catch (err) {

@@ -3,14 +3,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSavings } from '@/lib/queries';
 import { applyToWishlist } from '@/lib/savings';
+import { recordChange } from '@/lib/changelog';
+import { formatCurrency } from '@/lib/utils';
 
 function revalidate() {
   revalidatePath('/');
   revalidatePath('/savings');
+  revalidatePath('/goals');
   revalidatePath('/transactions');
   revalidatePath('/reports');
   revalidatePath('/wishlist');
   revalidatePath('/analytics');
+  revalidatePath('/activity');
 }
 
 export async function GET() {
@@ -73,6 +77,14 @@ export async function POST(request: NextRequest) {
     if (wishlistId) {
       await applyToWishlist(supabase, user.id, wishlistId, amount);
     }
+
+    await recordChange(
+      supabase,
+      user.id,
+      'saving',
+      'created',
+      `Saved ${formatCurrency(amount)} toward ${name}`,
+    );
 
     revalidate();
     return NextResponse.json(data?.[0], { status: 201 });

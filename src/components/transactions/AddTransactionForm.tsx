@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { ButtonSpinner } from '@/components/ui/Spinner';
 import { UpgradeNotice } from '@/components/UpgradeNotice';
@@ -46,8 +46,44 @@ export function AddTransactionForm({
   const [limitReached, setLimitReached] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [type, setType] = useState(initialType(transaction));
+  const [budgetCategories, setBudgetCategories] = useState<string[]>([]);
 
   const isSavings = type === 'savings';
+
+  // Pull the user's budget categories so transactions can be tagged against a
+  // budget (which is what makes budget-vs-actual line up). Loaded when the
+  // modal opens; failures fall back to just the built-in categories.
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    fetch('/api/budgets')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: unknown) => {
+        if (!active || !Array.isArray(data)) return;
+        const cats = data
+          .map((b) => (b as { category?: unknown }).category)
+          .filter((c): c is string => typeof c === 'string' && c.length > 0);
+        setBudgetCategories(Array.from(new Set(cats)));
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
+
+  // Built-in categories first, then any budget categories not already covered
+  // (plus the edited transaction's own category, so its value always resolves).
+  const baseSet = new Set<string>(CATEGORIES);
+  const editCategory =
+    transaction && transaction.category !== 'Savings'
+      ? transaction.category
+      : '';
+  const budgetOnlyCategories = Array.from(
+    new Set([
+      ...budgetCategories,
+      ...(editCategory && !baseSet.has(editCategory) ? [editCategory] : []),
+    ]),
+  ).filter((c) => !baseSet.has(c));
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -205,6 +241,15 @@ export function AddTransactionForm({
                   {cat}
                 </option>
               ))}
+              {budgetOnlyCategories.length > 0 && (
+                <optgroup label="From your budgets">
+                  {budgetOnlyCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
           </div>
         )}

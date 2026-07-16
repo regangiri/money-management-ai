@@ -2,6 +2,7 @@ import {
   ArrowRightLeft,
   ChartPie,
   FileText,
+  History,
   LayoutDashboard,
   LineChart,
   Target,
@@ -36,6 +37,7 @@ export const SECONDARY_NAV: NavItem[] = [
     ? [{ href: '/analytics', label: 'Analytics', icon: LineChart } as NavItem]
     : []),
   { href: '/reports', label: 'Reports', icon: FileText },
+  { href: '/activity', label: 'Activity', icon: History },
   { href: '/profile', label: 'Profile', icon: User },
 ];
 

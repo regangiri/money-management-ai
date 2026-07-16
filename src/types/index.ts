@@ -148,3 +148,21 @@ export type SavingEntry = {
   wishlistId: string | null;
   destination: string; // wishlist item name, or "Others"
 };
+
+// Audit log of create/update/delete actions across the user's data.
+export type ChangeAction = 'created' | 'updated' | 'deleted';
+export type ChangeEntity =
+  | 'transaction'
+  | 'budget'
+  | 'saving'
+  | 'goal'
+  | 'holding'
+  | 'profile';
+
+export type ChangeLogEntry = {
+  id: number | string;
+  entity: ChangeEntity;
+  action: ChangeAction;
+  summary: string;
+  createdAt: string;
+};

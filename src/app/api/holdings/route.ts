@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getHoldings } from '@/lib/queries';
 import { checkResourceLimit, limitReachedResponse } from '@/lib/entitlements';
+import { recordChange } from '@/lib/changelog';
 
 export async function GET() {
   return NextResponse.json(await getHoldings());
@@ -62,7 +63,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    await recordChange(
+      supabase,
+      user.id,
+      'holding',
+      'created',
+      quantity > 0
+        ? `Added ${quantity} ${symbol} @ ${avgCost}`
+        : `Added ${symbol} to watchlist`,
+    );
+
     revalidatePath('/analytics');
+    revalidatePath('/activity');
 
     return NextResponse.json(data?.[0], { status: 201 });
   } catch (err) {

@@ -2,14 +2,18 @@ import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { applyToWishlist } from '@/lib/savings';
+import { recordChange } from '@/lib/changelog';
+import { formatCurrency } from '@/lib/utils';
 
 function revalidate() {
   revalidatePath('/');
   revalidatePath('/savings');
+  revalidatePath('/goals');
   revalidatePath('/transactions');
   revalidatePath('/reports');
   revalidatePath('/wishlist');
   revalidatePath('/analytics');
+  revalidatePath('/activity');
 }
 
 export async function DELETE(
@@ -60,6 +64,14 @@ export async function DELETE(
         -Math.abs(Number(saving.amount)),
       );
     }
+
+    await recordChange(
+      supabase,
+      user.id,
+      'saving',
+      'deleted',
+      `Removed a ${formatCurrency(Math.abs(Number(saving.amount)))} saving`,
+    );
 
     revalidate();
     return NextResponse.json({ ok: true });
