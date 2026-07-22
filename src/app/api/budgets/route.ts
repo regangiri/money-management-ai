@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getBudgets } from '@/lib/queries';
 import { checkResourceLimit, limitReachedResponse } from '@/lib/entitlements';
+import { recordChange } from '@/lib/changelog';
+import { formatCurrency } from '@/lib/utils';
 
 export async function GET() {
   return NextResponse.json(await getBudgets());
@@ -53,9 +55,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    await recordChange(
+      supabase,
+      user.id,
+      'budget',
+      'created',
+      `Set a ${formatCurrency(total)} budget for ${category}`,
+    );
+
     revalidatePath('/budgets');
     revalidatePath('/reports');
     revalidatePath('/');
+    revalidatePath('/activity');
 
     return NextResponse.json(data?.[0], { status: 201 });
   } catch (err) {

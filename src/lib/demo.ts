@@ -88,6 +88,34 @@ export async function seedDemoData(
           ],
           { onConflict: 'user_id,symbol' },
         ),
+      // Audit-log entries mirroring the seed (direct inserts bypass the API
+      // routes that normally record these), so Activity isn't empty on day one.
+      supabase.from('changelog').insert([
+        {
+          user_id: userId,
+          entity: 'goal',
+          action: 'created',
+          summary: 'Added goal "Wireless headphones"',
+        },
+        {
+          user_id: userId,
+          entity: 'transaction',
+          action: 'created',
+          summary: 'Added "Monthly salary" (+Rp 2.500)',
+        },
+        {
+          user_id: userId,
+          entity: 'saving',
+          action: 'created',
+          summary: 'Saved Rp 90 toward headphones',
+        },
+        {
+          user_id: userId,
+          entity: 'budget',
+          action: 'created',
+          summary: 'Set a Rp 400 budget for Food & Drink',
+        },
+      ]),
     ]);
   } catch (err) {
     console.error('Demo seed failed (non-fatal):', err);

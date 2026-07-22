@@ -1,5 +1,6 @@
 import type {
   Budget,
+  ChangeLogEntry,
   Holding,
   MonthlySummary,
   Profile,
@@ -285,6 +286,48 @@ export const wishlist: WishlistItem[] = [
     targetDate: null,
     amountSaved: 5000000,
     status: 'fulfilled',
+  },
+];
+
+// Recent audit-log entries for the logged-out / offline mock experience.
+const hoursAgoISO = (h: number) =>
+  new Date(getNow().getTime() - h * 3_600_000).toISOString();
+
+export const changelog: ChangeLogEntry[] = [
+  {
+    id: 'c1',
+    entity: 'transaction',
+    action: 'created',
+    summary: 'Added "Grocery Store" (-Rp 87)',
+    createdAt: hoursAgoISO(2),
+  },
+  {
+    id: 'c2',
+    entity: 'budget',
+    action: 'updated',
+    summary: 'Set Food & Drink budget to Rp 400',
+    createdAt: hoursAgoISO(6),
+  },
+  {
+    id: 'c3',
+    entity: 'saving',
+    action: 'created',
+    summary: 'Saved Rp 800 toward Emergency Fund',
+    createdAt: hoursAgoISO(20),
+  },
+  {
+    id: 'c4',
+    entity: 'goal',
+    action: 'created',
+    summary: 'Added goal "MacBook Pro 16\\""',
+    createdAt: hoursAgoISO(28),
+  },
+  {
+    id: 'c5',
+    entity: 'transaction',
+    action: 'deleted',
+    summary: 'Deleted "Impulse buy"',
+    createdAt: hoursAgoISO(52),
   },
 ];
 
