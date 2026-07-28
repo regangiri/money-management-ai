@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local tooling / agent config
+.agents/
+.claude/
+.mcp.json
+skills-lock.json
+
+# supabase cli cache
+supabase/.temp/
