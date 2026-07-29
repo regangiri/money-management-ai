@@ -15,6 +15,7 @@ import { BudgetOverview } from '@/components/dashboard/BudgetOverview';
 import { BudgetSummary } from '@/components/dashboard/BudgetSummary';
 import { WishlistPreview } from '@/components/dashboard/WishlistPreview';
 import { HoldingsPreview } from '@/components/dashboard/HoldingsPreview';
+import { AssistantWidget } from '@/components/dashboard/AssistantWidget';
 import { AddTransactionForm } from '@/components/transactions/AddTransactionForm';
 import { FEATURES } from '@/lib/features';
 import type {
@@ -118,6 +119,8 @@ export function DashboardClient({
         onClose={() => setShowForm(false)}
         onSuccess={() => window.location.reload()}
       />
+
+      <AssistantWidget />
     </>
   );
 }
