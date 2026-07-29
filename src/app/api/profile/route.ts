@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getProfile } from '@/lib/queries';
 import { planForUser } from '@/lib/plans';
+import { recordChange } from '@/lib/changelog';
 
 export async function GET() {
   return NextResponse.json(await getProfile());
@@ -65,8 +66,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    await recordChange(
+      supabase,
+      user.id,
+      'profile',
+      'updated',
+      'Updated profile details',
+    );
+
     revalidatePath('/profile');
     revalidatePath('/budgets');
+    revalidatePath('/activity');
 
     return NextResponse.json(data?.[0], { status: 200 });
   } catch (err) {

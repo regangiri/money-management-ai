@@ -1,6 +1,7 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { recordChange } from '@/lib/changelog';
 import type { WishlistPriority, WishlistStatus } from '@/types';
 
 const PRIORITIES: WishlistPriority[] = ['high', 'medium', 'low'];
@@ -87,7 +88,18 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    const goalName = (data?.[0]?.name as string) ?? 'goal';
+    await recordChange(
+      supabase,
+      user.id,
+      'goal',
+      'updated',
+      `Updated goal "${goalName}"`,
+    );
+
     revalidatePath('/wishlist');
+    revalidatePath('/goals');
+    revalidatePath('/activity');
     return NextResponse.json(data?.[0]);
   } catch (err) {
     console.error('Error updating wishlist item:', err);
@@ -112,6 +124,14 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    const { data: existing } = await supabase
+      .from('wishlist')
+      .select('name')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
     const { error } = await supabase
       .from('wishlist')
       .delete()
@@ -123,7 +143,17 @@ export async function DELETE(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    await recordChange(
+      supabase,
+      user.id,
+      'goal',
+      'deleted',
+      existing?.name ? `Deleted goal "${existing.name}"` : 'Deleted a goal',
+    );
+
     revalidatePath('/wishlist');
+    revalidatePath('/goals');
+    revalidatePath('/activity');
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('Error deleting wishlist item:', err);

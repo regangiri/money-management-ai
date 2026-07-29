@@ -92,3 +92,31 @@ export function ytdRangeLabel(d: Date = getNow()): string {
   const month = d.toLocaleDateString('en-US', { month: 'long' });
   return `January through ${month} ${d.getFullYear()}`;
 }
+
+/** "just now" / "5m ago" / "3h ago" / "2d ago" / "Jun 17" for a timestamp. */
+export function formatRelativeTime(iso: string): string {
+  const diff = Math.max(getNow().getTime() - new Date(iso).getTime(), 0);
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+/** Day-group heading for a timestamp: "Today" / "Yesterday" / "Mon, Jun 15". */
+export function formatDayLabel(iso: string): string {
+  const day = toISODate(new Date(iso));
+  if (day === todayISO()) return 'Today';
+  if (day === daysAgoISO(1)) return 'Yesterday';
+  return new Date(iso).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}

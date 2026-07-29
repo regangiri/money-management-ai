@@ -1,11 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Receipt } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
-import { ButtonSpinner } from '@/components/ui/Spinner';
+import { ButtonSpinner, Spinner } from '@/components/ui/Spinner';
 import { UpgradeNotice } from '@/components/UpgradeNotice';
 import { todayISO } from '@/lib/date';
 import type { Transaction, TransactionCategory } from '@/types';
+
+// Fields the receipt scanner can prefill into the form.
+type Prefill = {
+  date?: string;
+  name?: string;
+  amount?: number;
+  category?: string;
+};
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error('Could not read the file.'));
+    reader.readAsDataURL(file);
+  });
+}
 
 const CATEGORIES: TransactionCategory[] = [
   'Income',
@@ -46,8 +64,95 @@ export function AddTransactionForm({
   const [limitReached, setLimitReached] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [type, setType] = useState(initialType(transaction));
+  const [budgetCategories, setBudgetCategories] = useState<string[]>([]);
+
+  // Receipt scanning: prefill the fields from an uploaded receipt. `formKey`
+  // remounts the (uncontrolled) inputs so their defaultValues re-read.
+  const [prefill, setPrefill] = useState<Prefill>({});
+  const [formKey, setFormKey] = useState(0);
+  const [scanning, setScanning] = useState(false);
+  const [scanError, setScanError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isSavings = type === 'savings';
+
+  // Clear any scan/prefill state on close and remount the fields, so reopening
+  // the modal starts from clean defaults rather than a previous scan.
+  const handleClose = () => {
+    setPrefill({});
+    setScanError('');
+    setScanning(false);
+    setFormKey((k) => k + 1);
+    onClose();
+  };
+
+  const handleReceipt = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    setScanError('');
+    setScanning(true);
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      const res = await fetch('/api/receipts/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataUrl }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not scan the receipt.');
+
+      setType('expense');
+      setPrefill({
+        date: data.date,
+        name: data.name,
+        amount: typeof data.amount === 'number' ? data.amount : undefined,
+        category: data.category,
+      });
+      setFormKey((k) => k + 1);
+    } catch (err) {
+      setScanError(
+        err instanceof Error ? err.message : 'Could not scan the receipt.',
+      );
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  // Pull the user's budget categories so transactions can be tagged against a
+  // budget (which is what makes budget-vs-actual line up). Loaded when the
+  // modal opens; failures fall back to just the built-in categories.
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    fetch('/api/budgets')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: unknown) => {
+        if (!active || !Array.isArray(data)) return;
+        const cats = data
+          .map((b) => (b as { category?: unknown }).category)
+          .filter((c): c is string => typeof c === 'string' && c.length > 0);
+        setBudgetCategories(Array.from(new Set(cats)));
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
+
+  // Built-in categories first, then any budget categories not already covered
+  // (plus the edited transaction's own category, so its value always resolves).
+  const baseSet = new Set<string>(CATEGORIES);
+  const editCategory =
+    transaction && transaction.category !== 'Savings'
+      ? transaction.category
+      : '';
+  const budgetOnlyCategories = Array.from(
+    new Set([
+      ...budgetCategories,
+      ...(editCategory && !baseSet.has(editCategory) ? [editCategory] : []),
+    ]),
+  ).filter((c) => !baseSet.has(c));
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -102,7 +207,7 @@ export function AddTransactionForm({
 
       setSuccessMsg(editMode ? 'Transaction updated!' : 'Transaction added!');
       setTimeout(() => {
-        onClose();
+        handleClose();
         onSuccess?.();
       }, 800);
     } catch (err) {
@@ -116,9 +221,45 @@ export function AddTransactionForm({
     <Modal
       isOpen={isOpen}
       title={editMode ? 'Edit Transaction' : 'Add Transaction'}
-      onClose={onClose}
+      onClose={handleClose}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {!editMode && (
+        <div className="mb-4">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif,application/pdf"
+            onChange={handleReceipt}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={scanning}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 border border-dashed border-blue-300 dark:border-blue-700 rounded-lg text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-60"
+          >
+            {scanning ? (
+              <>
+                <Spinner className="size-4" /> Scanning receipt…
+              </>
+            ) : (
+              <>
+                <Receipt className="size-4" /> Scan a receipt to auto-fill
+              </>
+            )}
+          </button>
+          <p className="mt-1 text-xs text-slate-400">
+            Snap a photo or upload an image or PDF. You can review before saving.
+          </p>
+          {scanError && (
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+              {scanError}
+            </p>
+          )}
+        </div>
+      )}
+
+      <form key={formKey} onSubmit={handleSubmit} className="space-y-4">
         {error &&
           (limitReached ? (
             <UpgradeNotice message={error} />
@@ -141,9 +282,7 @@ export function AddTransactionForm({
           <input
             type="date"
             name="date"
-            defaultValue={
-              transaction?.date ?? todayISO()
-            }
+            defaultValue={prefill.date ?? transaction?.date ?? todayISO()}
             className={FIELD_CLASS}
             required
           />
@@ -173,7 +312,7 @@ export function AddTransactionForm({
           <input
             type="text"
             name="name"
-            defaultValue={transaction?.name}
+            defaultValue={prefill.name ?? transaction?.name}
             placeholder="e.g., Coffee, Salary"
             className={FIELD_CLASS}
             required
@@ -192,9 +331,10 @@ export function AddTransactionForm({
             <select
               name="category"
               defaultValue={
-                transaction && transaction.category !== 'Savings'
+                prefill.category ??
+                (transaction && transaction.category !== 'Savings'
                   ? transaction.category
-                  : ''
+                  : '')
               }
               className={FIELD_CLASS}
               required
@@ -205,6 +345,15 @@ export function AddTransactionForm({
                   {cat}
                 </option>
               ))}
+              {budgetOnlyCategories.length > 0 && (
+                <optgroup label="From your budgets">
+                  {budgetOnlyCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
           </div>
         )}
@@ -216,7 +365,10 @@ export function AddTransactionForm({
           <input
             type="number"
             name="amount"
-            defaultValue={transaction ? Math.abs(transaction.amount) : undefined}
+            defaultValue={
+              prefill.amount ??
+              (transaction ? Math.abs(transaction.amount) : undefined)
+            }
             placeholder="0.00"
             step="0.01"
             min="0"
@@ -241,7 +393,7 @@ export function AddTransactionForm({
         <div className="flex gap-3 pt-4">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             disabled={loading}
           >

@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getTransactions } from '@/lib/queries';
 import { checkResourceLimit, limitReachedResponse } from '@/lib/entitlements';
+import { recordChange } from '@/lib/changelog';
+import { formatCurrency } from '@/lib/utils';
 
 export async function GET() {
   return NextResponse.json(await getTransactions());
@@ -50,9 +52,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    const isSaving = category === 'Savings';
+    await recordChange(
+      supabase,
+      user.id,
+      isSaving ? 'saving' : 'transaction',
+      'created',
+      isSaving
+        ? `Set aside ${formatCurrency(amount)} into savings`
+        : `Added "${name}" (${amount >= 0 ? '+' : '-'}${formatCurrency(amount)})`,
+    );
+
     revalidatePath('/');
     revalidatePath('/transactions');
     revalidatePath('/reports');
+    revalidatePath('/activity');
 
     return NextResponse.json(data?.[0], { status: 201 });
   } catch (err) {

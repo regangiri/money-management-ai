@@ -1,4 +1,4 @@
-import { Car, Coffee, DollarSign, Dumbbell, PiggyBank, ShoppingCart, Tv, Zap } from 'lucide-react';
+import { Car, Coffee, DollarSign, Dumbbell, PiggyBank, ShoppingCart, Tag, Tv, Zap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { TransactionCategory } from '@/types';
 
@@ -6,6 +6,14 @@ type IconConfig = {
   icon: LucideIcon;
   iconClass: string;
   wrapClass: string;
+};
+
+// Fallback for categories not in the built-in map — e.g. custom budget
+// categories ("Groceries", "Dining Out") that a transaction can be tagged with.
+const FALLBACK: IconConfig = {
+  icon: Tag,
+  iconClass: 'text-slate-500',
+  wrapClass: 'bg-slate-100 dark:bg-slate-800',
 };
 
 const iconMap: Record<TransactionCategory, IconConfig> = {
@@ -52,11 +60,12 @@ const iconMap: Record<TransactionCategory, IconConfig> = {
 };
 
 type TransactionIconProps = {
-  category: TransactionCategory;
+  category: string;
 };
 
 export function TransactionIcon({ category }: TransactionIconProps) {
-  const { icon: Icon, iconClass, wrapClass } = iconMap[category];
+  const { icon: Icon, iconClass, wrapClass } =
+    iconMap[category as TransactionCategory] ?? FALLBACK;
   return (
     <div className={`p-2 rounded-lg shrink-0 ${wrapClass}`}>
       <Icon className={`size-4 ${iconClass}`} />

@@ -1,5 +1,6 @@
 import type {
   Budget,
+  ChangeLogEntry,
   Holding,
   MonthlySummary,
   Portfolio,
@@ -14,6 +15,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getSessionUser } from '@/lib/auth';
 import {
   budgets as mockBudgets,
+  changelog as mockChangelog,
   holdings as mockHoldings,
   monthlySummaries as mockMonthlySummaries,
   profile as mockProfile,
@@ -306,4 +308,32 @@ export async function getSavingsSeries(): Promise<PricePoint[]> {
     cumulative += s.amount;
     return { date: s.date, value: cumulative };
   });
+}
+
+// The user's audit trail of create/update/delete actions, newest first.
+export async function getChangelog(): Promise<ChangeLogEntry[]> {
+  const user = await getSessionUser();
+  if (!user) return mockChangelog;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('changelog')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    // Table may not exist yet (migration not applied) — degrade gracefully.
+    console.error('Supabase error (changelog):', error.message);
+    return [];
+  }
+
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    entity: c.entity,
+    action: c.action,
+    summary: c.summary,
+    createdAt: c.created_at,
+  }));
 }
