@@ -4,6 +4,10 @@ import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { ButtonSpinner } from '@/components/ui/Spinner';
 import { formatCurrency } from '@/lib/utils';
+import { todayISO } from '@/lib/date';
+
+// Current month as YYYY-MM, for the <input type="month"> default.
+const currentMonth = () => todayISO().slice(0, 7);
 
 // Default share of monthly salary allocated to each budget category.
 // The remainder (40%) is left for savings & goals.
@@ -29,7 +33,7 @@ export function AutoAllocateForm({
   salary,
   onSuccess,
 }: AutoAllocateFormProps) {
-  const [month, setMonth] = useState('');
+  const [month, setMonth] = useState(currentMonth);
   const [income, setIncome] = useState(salary ? String(salary) : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
