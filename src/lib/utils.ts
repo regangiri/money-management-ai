@@ -48,5 +48,5 @@ export function formatDate(dateString: string): string {
 }
 
 export function pct(spent: number, total: number): number {
-  return Math.min(Math.round((spent / total) * 100), 100);
+  return Math.min(Math.round((spent / total) * 100), 100) || 0;
 }

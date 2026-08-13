@@ -5,6 +5,12 @@ import Anthropic from '@anthropic-ai/sdk';
 // its vision + tool-use capabilities.
 export const CLAUDE_MODEL = 'claude-haiku-4-5';
 
+// Bank-statement parsing is a heavier job (multi-page PDF, ~200 rows, needs
+// row-level accuracy) so it runs on a stronger model than the rest of the app.
+// Overridable via env in case a newer Sonnet id is preferred.
+export const STATEMENT_MODEL =
+  process.env.STATEMENT_MODEL || 'claude-sonnet-4-5';
+
 // A single shared client. Reads ANTHROPIC_API_KEY from the environment.
 // `getAnthropic()` throws a clear, catchable error when the key is missing so
 // route handlers can return a friendly 503 instead of a raw stack trace.

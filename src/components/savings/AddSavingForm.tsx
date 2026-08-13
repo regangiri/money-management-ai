@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { ButtonSpinner } from '@/components/ui/Spinner';
 import { todayISO } from '@/lib/date';
-import { OTHERS_DESTINATION, type WishlistItem } from '@/types';
+import { pocketSubtitle } from '@/lib/pockets';
+import { OTHERS_DESTINATION, type Pocket, type WishlistItem } from '@/types';
 
 const FIELD_CLASS =
   'w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent';
@@ -29,6 +30,29 @@ export function AddSavingForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [pockets, setPockets] = useState<Pocket[]>([]);
+  const [pocketId, setPocketId] = useState('');
+
+  // The pocket the money is set aside from. Loaded when the modal opens;
+  // a single pocket needs no choosing, so it's preselected.
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    fetch('/api/pockets')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: unknown) => {
+        if (!active || !Array.isArray(data)) return;
+        const list = (data as Pocket[]).filter((p) => !p.archived);
+        setPockets(list);
+        setPocketId((current) =>
+          current || list.length !== 1 ? current : String(list[0].id),
+        );
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,6 +72,12 @@ export function AddSavingForm({
       return;
     }
 
+    if (pockets.length > 0 && !pocketId) {
+      setError('Choose the pocket this money comes from');
+      setLoading(false);
+      return;
+    }
+
     const wishlistId =
       destination && destination !== OTHERS_DESTINATION ? destination : null;
     // Default the description to the destination so the saving reads clearly.
@@ -60,7 +90,13 @@ export function AddSavingForm({
       const res = await fetch('/api/savings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, date, wishlistId, name }),
+        body: JSON.stringify({
+          amount,
+          date,
+          wishlistId,
+          name,
+          ...(pockets.length > 0 ? { pocketId } : {}),
+        }),
       });
 
       if (!res.ok) {
@@ -133,6 +169,29 @@ export function AddSavingForm({
             Allocating to a wishlist item adds to its saved progress.
           </p>
         </div>
+
+        {pockets.length > 0 && (
+          <div>
+            <label className={LABEL_CLASS}>Set aside from</label>
+            <select
+              name="pocketId"
+              value={pocketId}
+              onChange={(e) => setPocketId(e.target.value)}
+              className={FIELD_CLASS}
+              required
+            >
+              <option value="">Select a pocket</option>
+              {pockets.map((p) => (
+                <option key={p.id} value={String(p.id)}>
+                  {p.name} — {pocketSubtitle(p)}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-slate-400 wrap-break-word">
+              Comes out of that pocket&apos;s balance.
+            </p>
+          </div>
+        )}
 
         <div>
           <label className={LABEL_CLASS}>

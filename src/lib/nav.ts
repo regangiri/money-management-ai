@@ -7,6 +7,7 @@ import {
   LineChart,
   Target,
   User,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { FEATURES } from '@/lib/features';
@@ -32,6 +33,7 @@ export const PRIMARY_NAV: NavItem[] = [
 // Savings + Wishlist are unified into one "Goals" surface. Analytics is
 // gated by the MVP feature flag.
 export const SECONDARY_NAV: NavItem[] = [
+  { href: '/pockets', label: 'Pockets', icon: Wallet },
   { href: '/goals', label: 'Goals', icon: Target },
   ...(FEATURES.analytics
     ? [{ href: '/analytics', label: 'Analytics', icon: LineChart } as NavItem]

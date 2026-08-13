@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { getTransactions } from '@/lib/queries';
+import { getPockets, getTransactions } from '@/lib/queries';
 import {
   formatCurrency,
   sumExpenses,
@@ -9,6 +9,7 @@ import {
 } from '@/lib/utils';
 import { TransactionList } from '@/components/transactions/TransactionList';
 import { AddTransactionButton } from '@/components/transactions/AddTransactionButton';
+import { StatementImport } from '@/components/transactions/StatementImport';
 import { RecurringTransactions } from '@/components/transactions/RecurringTransactions';
 import { DateFilter } from '@/components/transactions/DateFilter';
 
@@ -24,7 +25,7 @@ export default async function TransactionsPage({
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
   const { from, to } = await searchParams;
-  const all = await getTransactions();
+  const [all, pockets] = await Promise.all([getTransactions(), getPockets()]);
   const transactions = all.filter(
     (t) => (!from || t.date >= from) && (!to || t.date <= to),
   );
@@ -51,6 +52,7 @@ export default async function TransactionsPage({
         </div>
         <div className="flex items-center gap-2">
           <RecurringTransactions />
+          <StatementImport pockets={pockets} />
           <AddTransactionButton />
         </div>
       </div>
@@ -89,7 +91,7 @@ export default async function TransactionsPage({
         </div>
       </div>
 
-      <TransactionList transactions={transactions} />
+      <TransactionList transactions={transactions} pockets={pockets} />
     </div>
   );
 }
