@@ -37,6 +37,7 @@ const ENTITY_LABEL: Record<ChangeEntity, string> = {
   saving: 'Saving',
   goal: 'Goal',
   holding: 'Asset',
+  pocket: 'Pocket',
   profile: 'Profile',
 };
 

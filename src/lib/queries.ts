@@ -3,6 +3,8 @@ import type {
   ChangeLogEntry,
   Holding,
   MonthlySummary,
+  Pocket,
+  PocketWithBalance,
   Portfolio,
   PricePoint,
   Profile,
@@ -18,10 +20,12 @@ import {
   changelog as mockChangelog,
   holdings as mockHoldings,
   monthlySummaries as mockMonthlySummaries,
+  pockets as mockPockets,
   profile as mockProfile,
   transactions as mockTransactions,
 } from '@/lib/data';
 import { getQuotes, getTimeSeries } from '@/lib/market';
+import { withBalances } from '@/lib/pockets';
 import { buildPortfolio } from '@/lib/portfolio';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -53,7 +57,56 @@ export async function getTransactions(): Promise<Transaction[]> {
     return mockTransactions;
   }
 
-  return (data as Transaction[]) ?? [];
+  // Map the snake_case column to the camelCase app type.
+  return (data ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    category: t.category,
+    amount: Number(t.amount),
+    date: t.date,
+    note: t.note ?? undefined,
+    pocketId: t.pocket_id ?? null,
+    createdAt: t.created_at ?? undefined,
+  }));
+}
+
+export async function getPockets(): Promise<Pocket[]> {
+  const user = await getSessionUser();
+  if (!user) return mockPockets;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('pockets')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    // Table may not exist yet (migration not applied) — degrade gracefully so
+    // the rest of the app keeps working without pockets.
+    console.error('Supabase error (pockets):', error.message);
+    return [];
+  }
+
+  // Map the snake_case columns to the camelCase app type.
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    type: p.type,
+    issuer: p.issuer ?? null,
+    openingBalance: Number(p.opening_balance ?? 0),
+    archived: !!p.archived,
+  }));
+}
+
+// Pockets with the balance each one currently holds, derived from the
+// transactions assigned to it.
+export async function getPocketsWithBalance(): Promise<PocketWithBalance[]> {
+  const [pockets, transactions] = await Promise.all([
+    getPockets(),
+    getTransactions(),
+  ]);
+  return withBalances(pockets, transactions);
 }
 
 export async function getBudgets(): Promise<Budget[]> {

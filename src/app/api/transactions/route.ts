@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getTransactions } from '@/lib/queries';
 import { checkResourceLimit, limitReachedResponse } from '@/lib/entitlements';
 import { recordChange } from '@/lib/changelog';
+import { resolvePocketId } from '@/lib/pockets';
 import { formatCurrency } from '@/lib/utils';
 
 export async function GET() {
@@ -40,10 +41,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Which pocket the money came out of (expense/savings) or landed in
+    // (income). Optional — an unassigned transaction still counts everywhere
+    // except pocket balances.
+    const pocket = await resolvePocketId(supabase, user.id, body.pocketId);
+    if ('error' in pocket) {
+      return NextResponse.json({ error: pocket.error }, { status: 400 });
+    }
+
     const { data, error } = await supabase
       .from('transactions')
       .insert([
-        { user_id: user.id, name, category, amount, date, note: note ?? null },
+        {
+          user_id: user.id,
+          name,
+          category,
+          amount,
+          date,
+          note: note ?? null,
+          // Only written when a pocket was chosen, so the app still works
+          // against a database where the pockets migration hasn't been run.
+          ...(pocket.pocketId ? { pocket_id: pocket.pocketId } : {}),
+        },
       ])
       .select();
 
@@ -66,6 +85,7 @@ export async function POST(request: NextRequest) {
     revalidatePath('/');
     revalidatePath('/transactions');
     revalidatePath('/reports');
+    revalidatePath('/pockets');
     revalidatePath('/activity');
 
     return NextResponse.json(data?.[0], { status: 201 });

@@ -7,7 +7,12 @@ import type { User } from '@supabase/supabase-js';
 export type PlanTier = 'demo' | 'registered' | 'pro';
 
 // Countable resources users create. Table names live in entitlements.ts.
-export type ResourceKey = 'transactions' | 'budgets' | 'holdings' | 'wishlist';
+export type ResourceKey =
+  | 'transactions'
+  | 'budgets'
+  | 'holdings'
+  | 'wishlist'
+  | 'pockets';
 
 // Boolean capabilities — the hooks paid tiers unlock later.
 export type FeatureKey =
@@ -29,6 +34,7 @@ const UNLIMITED: Record<ResourceKey, number> = {
   budgets: Infinity,
   holdings: Infinity,
   wishlist: Infinity,
+  pockets: Infinity,
 };
 
 export const PLANS: Record<PlanTier, Plan> = {
@@ -41,6 +47,7 @@ export const PLANS: Record<PlanTier, Plan> = {
       budgets: 2,
       holdings: 2,
       wishlist: 3,
+      pockets: 3,
     },
     features: {
       editProfile: false,
@@ -81,6 +88,7 @@ export const RESOURCE_LABELS: Record<ResourceKey, string> = {
   budgets: 'budgets',
   holdings: 'assets',
   wishlist: 'wishlist items',
+  pockets: 'pockets',
 };
 
 /**

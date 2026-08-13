@@ -2,12 +2,14 @@ import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { recordChange } from '@/lib/changelog';
+import { resolvePocketId } from '@/lib/pockets';
 
 function revalidate() {
   revalidatePath('/');
   revalidatePath('/transactions');
   revalidatePath('/reports');
   revalidatePath('/budgets');
+  revalidatePath('/pockets');
   revalidatePath('/activity');
 }
 
@@ -39,6 +41,13 @@ export async function PATCH(
         );
       }
       update.amount = body.amount;
+    }
+    if (body.pocketId !== undefined) {
+      const pocket = await resolvePocketId(supabase, user.id, body.pocketId);
+      if ('error' in pocket) {
+        return NextResponse.json({ error: pocket.error }, { status: 400 });
+      }
+      update.pocket_id = pocket.pocketId;
     }
 
     if (Object.keys(update).length === 0) {

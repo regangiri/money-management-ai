@@ -18,6 +18,7 @@ Stores all income and expense entries.
 | `category`   | TEXT          | Category type (e.g., "Food & Drink", "Income")        |
 | `amount`     | DECIMAL(10,2) | Amount in USD (positive = income, negative = expense) |
 | `date`       | DATE          | Transaction date (ISO 8601 format)                    |
+| `pocket_id`  | UUID          | Pocket the money moved through (nullable)             |
 | `created_at` | TIMESTAMP     | Record creation timestamp (auto-set)                  |
 
 **Constraints:**
@@ -70,6 +71,31 @@ Stores budget limits by category.
 }
 ```
 
+### `pockets`
+
+Where the money actually sits: e-money cards, bank accounts, cash, or anything
+custom. A transaction names the pocket it was paid from (expense/savings) or
+received into (income).
+
+| Column            | Type          | Description                                           |
+| ----------------- | ------------- | ----------------------------------------------------- |
+| `id`              | UUID          | Primary key, auto-generated                           |
+| `user_id`         | TEXT          | Owning auth user                                      |
+| `name`            | TEXT          | Pocket name (e.g., "Flazz", "BCA Main")               |
+| `type`            | TEXT          | `emoney` \| `bank` \| `cash` \| `custom`              |
+| `issuer`          | TEXT          | Who issues/holds it (e.g., "BCA Flazz"), nullable     |
+| `opening_balance` | DECIMAL(14,2) | Balance before any tracked transaction                |
+| `archived`        | BOOLEAN       | Hidden from pickers when true                         |
+| `created_at`      | TIMESTAMP     | Record creation timestamp (auto-set)                  |
+
+**Constraints:**
+
+- `type IN ('emoney', 'bank', 'cash', 'custom')`
+- `UNIQUE(user_id, name)` — one pocket per name per user
+- `transactions.pocket_id` references it `ON DELETE SET NULL`, so deleting a
+  pocket keeps its transactions (they just stop being attributed to a pocket)
+- Indexed on `user_id`; `transactions` indexed on `pocket_id`
+
 ## Computed Values
 
 The app computes the following values on-the-fly (NOT stored in the database):
@@ -84,7 +110,22 @@ WHERE user_id = 'user-1'
   AND amount < 0  -- expenses only
 ```
 
-This ensures real-time accuracy without storing duplicate data.
+This ensures real-time accuracy without storing duplicate data. Note that
+`spent` deliberately ignores `pocket_id`: a budget counts every expense in its
+category, whichever pocket paid for it.
+
+### `balance` (for pockets)
+
+```sql
+SELECT p.opening_balance + COALESCE(SUM(t.amount), 0)
+FROM pockets p
+LEFT JOIN transactions t ON t.pocket_id = p.id
+WHERE p.user_id = auth.uid()::text
+GROUP BY p.id
+```
+
+Income is stored positive and expenses/savings negative, so the running sum is
+the balance. The app computes this in `withBalances()` (`src/lib/pockets.ts`).
 
 ### `budget_utilization` (percentage)
 

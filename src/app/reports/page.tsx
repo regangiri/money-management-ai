@@ -49,7 +49,8 @@ export default async function ReportsPage() {
   const totalBudget = budgets.reduce((sum, b) => sum + b.total, 0);
   const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const budgetRemaining = totalBudget - totalBudgetSpent;
-  const budgetUtilization = Math.round((totalBudgetSpent / totalBudget) * 100);
+  const budgetUtilization =
+    Math.round((totalBudgetSpent / totalBudget) * 100) || 0;
 
   return (
     <div className="p-6 sm:p-8 space-y-6 min-h-full bg-slate-50 dark:bg-slate-950">
@@ -64,7 +65,9 @@ export default async function ReportsPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900">
-          <p className="text-xs text-slate-500 dark:text-slate-400">YTD Income</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            YTD Income
+          </p>
           <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
             {formatCurrency(ytdIncome)}
           </p>
