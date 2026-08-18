@@ -4,7 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { LogOut, MoreHorizontal, Plus, X } from 'lucide-react';
-import { PRIMARY_NAV, SECONDARY_NAV, SECONDARY_HREFS } from '@/lib/nav';
+import {
+  PRIMARY_NAV,
+  SECONDARY_NAV,
+  SECONDARY_HREFS,
+  isChromeless,
+} from '@/lib/nav';
 import { AddTransactionForm } from '@/components/transactions/AddTransactionForm';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { signOut } from '@/app/auth/actions';
@@ -17,8 +22,8 @@ export function BottomNav() {
   const [showAdd, setShowAdd] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
-  // No app chrome on the auth screens.
-  if (pathname === '/login' || pathname === '/signup') return null;
+  // No app chrome on the auth screens or the public demo.
+  if (isChromeless(pathname)) return null;
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);

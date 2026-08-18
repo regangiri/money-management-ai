@@ -12,16 +12,10 @@ import {
 } from '@/lib/utils';
 import { todayISO } from '@/lib/date';
 
-// Expense categories the assistant may assign to a transaction or budget. Keep
-// in sync with the picker in AddTransactionForm.
-export const ASSISTANT_CATEGORIES = [
-  'Shopping',
-  'Food & Drink',
-  'Utilities',
-  'Transport',
-  'Health',
-  'Entertainment',
-] as const;
+// The category list lives in a leaf module so the public demo route can share
+// it without importing this file (which reaches Supabase through @/lib/queries).
+// Re-exported here so every existing import site keeps working unchanged.
+export { ASSISTANT_CATEGORIES } from '@/lib/categories';
 
 // A concrete change the assistant wants to make. The agent proposes these; the
 // user confirms each one in the UI before it's written (via the existing REST
