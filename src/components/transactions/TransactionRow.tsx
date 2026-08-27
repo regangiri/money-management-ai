@@ -49,7 +49,10 @@ export function TransactionRow({
   );
 
   return (
-    <li className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5">
+    <li
+      data-testid="transaction-row"
+      className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5"
+    >
       {/* The row body is the button, so it never nests inside the edit/delete
           controls sitting next to it. */}
       {onSelect ? (

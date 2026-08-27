@@ -65,6 +65,7 @@ export function PocketList({ pockets }: PocketListProps) {
         {pockets.map((p) => (
           <div
             key={p.id}
+            data-testid="pocket-card"
             className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-4 space-y-3"
           >
             <div className="flex items-start gap-3">

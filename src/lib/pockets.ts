@@ -17,8 +17,10 @@ export const POCKET_TYPE_LABELS: Record<PocketType, string> = {
 };
 
 // Shown under the name on cards and in the picker, so "Flazz" reads as
-// "E-money · BCA" rather than just a bare label.
-export function pocketSubtitle(pocket: Pocket): string {
+// "E-money · BCA" rather than just a bare label. Takes only the two fields it
+// reads, so callers holding a pocket-shaped object (e.g. the landing demo's
+// fake pockets) can use it without inventing an id and a balance.
+export function pocketSubtitle(pocket: Pick<Pocket, 'type' | 'issuer'>): string {
   const type = POCKET_TYPE_LABELS[pocket.type];
   return pocket.issuer ? `${type} · ${pocket.issuer}` : type;
 }

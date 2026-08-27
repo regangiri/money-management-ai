@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { signOut } from '@/app/auth/actions';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { ALL_NAV } from '@/lib/nav';
+import { ALL_NAV, isChromeless } from '@/lib/nav';
 
 type SidebarProps = {
   userName?: string;
@@ -19,8 +19,8 @@ const Sidebar = ({ userName, userEmail }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
-  // The auth screens render full-bleed without the app chrome.
-  if (pathname === '/login' || pathname === '/signup') return null;
+  // The auth screens and the public demo render full-bleed, no app chrome.
+  if (isChromeless(pathname)) return null;
 
   const displayName = userName || 'Account';
   const initial = (userName || userEmail || '?').charAt(0).toUpperCase();
