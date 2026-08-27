@@ -7,6 +7,7 @@ import {
   LineChart,
   Target,
   User,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { FEATURES } from '@/lib/features';
@@ -32,6 +33,7 @@ export const PRIMARY_NAV: NavItem[] = [
 // Savings + Wishlist are unified into one "Goals" surface. Analytics is
 // gated by the MVP feature flag.
 export const SECONDARY_NAV: NavItem[] = [
+  { href: '/pockets', label: 'Pockets', icon: Wallet },
   { href: '/goals', label: 'Goals', icon: Target },
   ...(FEATURES.analytics
     ? [{ href: '/analytics', label: 'Analytics', icon: LineChart } as NavItem]
@@ -45,3 +47,14 @@ export const ALL_NAV: NavItem[] = [...PRIMARY_NAV, ...SECONDARY_NAV];
 
 /** Href prefixes that should light up the "More" tab as active. */
 export const SECONDARY_HREFS = SECONDARY_NAV.map((i) => i.href);
+
+// Routes that render full-bleed without the app chrome: the auth screens and
+// the public landing demo. Lives here for the same reason the nav model does —
+// the Sidebar and the BottomNav both read it, so the two can never drift.
+const CHROMELESS_ROUTES = ['/login', '/signup', '/demo'];
+
+export function isChromeless(pathname: string): boolean {
+  return CHROMELESS_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+}

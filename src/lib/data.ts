@@ -3,6 +3,7 @@ import type {
   ChangeLogEntry,
   Holding,
   MonthlySummary,
+  Pocket,
   Profile,
   Quote,
   Transaction,
@@ -188,6 +189,44 @@ const RAW_TRANSACTIONS: Transaction[] = [
   },
 ];
 
+// The pockets money moves through in the mock/offline dataset.
+export const pockets: Pocket[] = [
+  {
+    id: 'pocket-bank',
+    name: 'BCA Main',
+    type: 'bank',
+    issuer: 'BCA',
+    openingBalance: 2500,
+    archived: false,
+  },
+  {
+    id: 'pocket-flazz',
+    name: 'Flazz',
+    type: 'emoney',
+    issuer: 'BCA Flazz',
+    openingBalance: 300,
+    archived: false,
+  },
+  {
+    id: 'pocket-cash',
+    name: 'Cash',
+    type: 'cash',
+    issuer: null,
+    openingBalance: 200,
+    archived: false,
+  },
+];
+
+// Which pocket each mock transaction ran through, by category — daily small
+// spend on the e-money card, salary and bills through the bank, the rest cash.
+const MOCK_POCKET_BY_CATEGORY: Record<string, string> = {
+  'Food & Drink': 'pocket-flazz',
+  Transport: 'pocket-flazz',
+  Income: 'pocket-bank',
+  Utilities: 'pocket-bank',
+  Savings: 'pocket-bank',
+};
+
 // Shift the whole set so its most recent date is today, preserving the relative
 // spacing between rows. Derived once at module load from the single date source.
 const SHIFT_DAYS = (() => {
@@ -203,6 +242,7 @@ const SHIFT_DAYS = (() => {
 export const transactions: Transaction[] = RAW_TRANSACTIONS.map((t) => ({
   ...t,
   date: addDaysISO(t.date, SHIFT_DAYS),
+  pocketId: MOCK_POCKET_BY_CATEGORY[t.category] ?? 'pocket-cash',
 }));
 
 export const budgets: Budget[] = [

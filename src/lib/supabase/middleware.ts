@@ -3,7 +3,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 
 // Routes reachable without a session. Everything else redirects to /login.
-const PUBLIC_PREFIXES = ['/login', '/signup', '/auth'];
+// `/demo` is the public landing page — it holds the voice demo and touches no
+// user data, so a stranger can try the product before creating an account.
+// `/api/demo` is that page's parse endpoint: it must be listed separately,
+// since the prefix match is on the full path and `/api/demo/parse` does not
+// start with `/demo`. Without it a signed-out visitor's fetch is redirected to
+// /login and the demo silently does nothing.
+const PUBLIC_PREFIXES = ['/login', '/signup', '/auth', '/demo', '/api/demo'];
 
 function isPublic(pathname: string) {
   return PUBLIC_PREFIXES.some(

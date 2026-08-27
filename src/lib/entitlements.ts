@@ -15,6 +15,7 @@ const RESOURCE_TABLE: Record<ResourceKey, string> = {
   budgets: 'budgets',
   holdings: 'holdings',
   wishlist: 'wishlist',
+  pockets: 'pockets',
 };
 
 type LimitResult = {

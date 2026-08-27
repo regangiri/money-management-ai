@@ -4,11 +4,13 @@ import { createClient } from '@/lib/supabase/server';
 import { getSavings } from '@/lib/queries';
 import { applyToWishlist } from '@/lib/savings';
 import { recordChange } from '@/lib/changelog';
+import { resolvePocketId } from '@/lib/pockets';
 import { formatCurrency } from '@/lib/utils';
 
 function revalidate() {
   revalidatePath('/');
   revalidatePath('/savings');
+  revalidatePath('/pockets');
   revalidatePath('/goals');
   revalidatePath('/transactions');
   revalidatePath('/reports');
@@ -53,6 +55,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // The pocket the money is set aside from.
+    const pocket = await resolvePocketId(supabase, user.id, body.pocketId);
+    if ('error' in pocket) {
+      return NextResponse.json({ error: pocket.error }, { status: 400 });
+    }
+
     // Stored as a negative-amount Savings transaction (money leaving the
     // spendable balance), matching how the rest of the app models savings.
     const { data, error } = await supabase
@@ -65,6 +73,9 @@ export async function POST(request: NextRequest) {
           amount: -amount,
           date,
           wishlist_id: wishlistId,
+          // Only written when a pocket was chosen, so the app still works
+          // against a database where the pockets migration hasn't been run.
+          ...(pocket.pocketId ? { pocket_id: pocket.pocketId } : {}),
         },
       ])
       .select();

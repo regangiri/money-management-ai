@@ -15,6 +15,37 @@ export type Transaction = {
   amount: number;
   date: string;
   note?: string;
+  // The pocket the money moved through. null = not attributed to any pocket,
+  // either because none was picked or because the pocket was later deleted.
+  pocketId?: string | null;
+  // When the row was recorded (not the calendar date of the spend itself).
+  createdAt?: string;
+};
+
+// A pocket is a container money actually lives in — an e-money card (Flazz,
+// e-Money, TapCash), a bank account, cash in hand, or anything custom. Every
+// transaction can name the pocket it was paid from (expense/savings) or
+// received into (income). Budgets ignore pockets entirely: spending counts
+// against its category no matter which pocket paid.
+export const POCKET_TYPES = ['emoney', 'bank', 'cash', 'custom'] as const;
+
+export type PocketType = (typeof POCKET_TYPES)[number];
+
+export type Pocket = {
+  id: number | string;
+  name: string;
+  type: PocketType;
+  // Who issues/holds it — "BCA" for a Flazz card, "Mandiri" for an account.
+  issuer: string | null;
+  // What the pocket held before any tracked transaction touched it.
+  openingBalance: number;
+  archived: boolean;
+};
+
+// A pocket with its live balance derived from the transactions assigned to it.
+export type PocketWithBalance = Pocket & {
+  balance: number;
+  transactionCount: number;
 };
 
 // A detected budget "leak" — a place money is quietly draining.
@@ -157,6 +188,7 @@ export type ChangeEntity =
   | 'saving'
   | 'goal'
   | 'holding'
+  | 'pocket'
   | 'profile';
 
 export type ChangeLogEntry = {

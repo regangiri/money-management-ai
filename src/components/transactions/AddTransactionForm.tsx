@@ -6,7 +6,8 @@ import { Modal } from '@/components/ui/Modal';
 import { ButtonSpinner, Spinner } from '@/components/ui/Spinner';
 import { UpgradeNotice } from '@/components/UpgradeNotice';
 import { todayISO } from '@/lib/date';
-import type { Transaction, TransactionCategory } from '@/types';
+import { pocketSubtitle } from '@/lib/pockets';
+import type { Pocket, Transaction, TransactionCategory } from '@/types';
 
 // Fields the receipt scanner can prefill into the form.
 type Prefill = {
@@ -65,6 +66,10 @@ export function AddTransactionForm({
   const [successMsg, setSuccessMsg] = useState('');
   const [type, setType] = useState(initialType(transaction));
   const [budgetCategories, setBudgetCategories] = useState<string[]>([]);
+  const [pockets, setPockets] = useState<Pocket[]>([]);
+  const [pocketId, setPocketId] = useState(
+    transaction?.pocketId ? String(transaction.pocketId) : '',
+  );
 
   // Receipt scanning: prefill the fields from an uploaded receipt. `formKey`
   // remounts the (uncontrolled) inputs so their defaultValues re-read.
@@ -140,6 +145,27 @@ export function AddTransactionForm({
     };
   }, [isOpen]);
 
+  // The pockets the money can come from / land in. A user with exactly one
+  // pocket gets it preselected — there's nothing to choose.
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    fetch('/api/pockets')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: unknown) => {
+        if (!active || !Array.isArray(data)) return;
+        const list = (data as Pocket[]).filter((p) => !p.archived);
+        setPockets(list);
+        setPocketId((current) =>
+          current || list.length !== 1 ? current : String(list[0].id),
+        );
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
+
   // Built-in categories first, then any budget categories not already covered
   // (plus the edited transaction's own category, so its value always resolves).
   const baseSet = new Set<string>(CATEGORIES);
@@ -177,6 +203,18 @@ export function AddTransactionForm({
       return;
     }
 
+    // Once the user has pockets, every transaction has to say which one it
+    // moved through — otherwise pocket balances quietly drift.
+    if (pockets.length > 0 && !pocketId) {
+      setError(
+        type === 'income'
+          ? 'Choose the pocket this money went into'
+          : 'Choose the pocket this was paid from',
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(
         editMode ? `/api/transactions/${transaction.id}` : '/api/transactions',
@@ -188,6 +226,9 @@ export function AddTransactionForm({
             name,
             category,
             note: note || null,
+            // Left out entirely when the user has no pockets, so nothing
+            // depends on the pockets migration having been applied.
+            ...(pockets.length > 0 ? { pocketId } : {}),
             // Income adds to balance; expenses and savings both leave it.
             amount: type === 'income' ? amount : -amount,
           }),
@@ -375,6 +416,41 @@ export function AddTransactionForm({
             className={FIELD_CLASS}
             required
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            {type === 'income' ? 'Received into' : 'Paid from'}
+          </label>
+          {pockets.length === 0 ? (
+            <p className="text-xs text-slate-400 wrap-break-word">
+              No pockets yet. Add your e-money cards, bank accounts or cash
+              under <strong>Pockets</strong> to track which one each transaction
+              moves through.
+            </p>
+          ) : (
+            <>
+              <select
+                name="pocketId"
+                value={pocketId}
+                onChange={(e) => setPocketId(e.target.value)}
+                className={FIELD_CLASS}
+                required
+              >
+                <option value="">Select a pocket</option>
+                {pockets.map((p) => (
+                  <option key={p.id} value={String(p.id)}>
+                    {p.name} — {pocketSubtitle(p)}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-slate-400 wrap-break-word">
+                {type === 'income'
+                  ? 'Adds to that pocket’s balance.'
+                  : 'Comes out of that pocket’s balance. Your budgets count this either way.'}
+              </p>
+            </>
+          )}
         </div>
 
         <div>
